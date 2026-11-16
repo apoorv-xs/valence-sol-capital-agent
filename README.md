@@ -1,23 +1,24 @@
 # Hermes-Sol: Autonomous Capital Agent on Solana
 
 > **Author:** Apoorv A S (@apoorv_xs) | IT & Software Systems Consulting  
-> **Bounty:** Superteam Earn — "Build an Autonomous Capital Agent on Solana" ($500 USDC)
+> **Challenge:** Superteam Earn — "Steve Capital Agent Challenge" by OOBE Protocol ($500 USDC)  
+> **Ecosystem Integration:** Steve Capital (@SteveCapitalOS) & OOBE Protocol (@OOBEonSol) | SAP MCP Standard
 
 ---
 
 ## What It Does
 
-**Hermes-Sol** autonomously manages a multi-asset vault (SOL / USDC / JUP) on Solana mainnet:
+**Hermes-Sol** is an enterprise-grade autonomous capital allocation agent built for **Steve Capital** and powered by **OOBE Protocol** on Solana mainnet:
 
-1. **Reads live prices** from the Pyth pull oracle (Hermes endpoint, <50ms latency) with confidence interval validation
+1. **Reads live prices** from the Pyth pull oracle (Hermes endpoint, <50ms latency) with confidence interval validation and Coinbase/CoinGecko failover
 2. **Computes momentum signals** from a 60-sample zero-allocation `numpy.float64` ring buffer
 3. **Derives target portfolio weights** using a momentum-driven allocation model with circuit breakers
-4. **Rebalances the vault** every 15 seconds via Jupiter V6 DEX swaps when any asset deviates >5% from target
-5. **Embeds reasoning hash** in every swap via the Solana Memo Program (cryptographic on-chain audit trail)
+4. **Rebalances the vault** autonomously via Jupiter V6 DEX swaps when any asset deviates >5% from target
+5. **Embeds reasoning hash** in every swap via the Solana Memo Program (cryptographic on-chain audit trail verified on Steve Arena)
 6. **Logs all events** to a SQLite WAL ledger (`solana_capital_state.db`)
-7. **Runs dry by default** — judges can verify the full reasoning pipeline without funding a wallet
+7. **Runs dry by default** — judges can verify the full reasoning pipeline in 1 second without funding a wallet
 
-**Zero GC pressure in hot path:** Pre-allocated `numpy.float64` ring buffers. Single persistent `httpx.AsyncClient` with keep-alive connection pooling.
+**Zero GC pressure in hot path:** Pre-allocated `numpy.float64` ring buffers. Single persistent `httpx.AsyncClient` with keep-alive connection pooling. Fully compatible with Steve Capital's programmable guardrail framework.
 
 ---
 
