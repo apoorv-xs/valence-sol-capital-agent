@@ -77,7 +77,7 @@ JUP_MINT   = "JUPyiwrYJFskUPiHa7hkeR8VUtAeFoSYbKedZNsDvCN"
 RPC_ENDPOINT      = os.getenv("SOLANA_RPC", "https://api.mainnet-beta.solana.com")
 JUPITER_QUOTE_URL = "https://api.jup.ag/swap/v1/quote"
 JUPITER_SWAP_URL  = "https://api.jup.ag/swap/v1/swap"
-PYTH_HERMES_URL   = "https://hermes.pyth.network/v2/updates/price/latest"
+PYTH_ORACLE_URL   = "https://hermes.pyth.network/v2/updates/price/latest"
 JITO_TIP_ACCOUNT  = "96gYZGLnJYVFmbjzopPSU6QiEV5fGqZNyN9nmNhvrZU5"  # Jito tip account
 
 # Solana Memo Program (for on-chain audit trail)
@@ -257,7 +257,7 @@ def build_reasoning_hash(state: VaultState, prices: dict, targets: dict) -> str:
 # ── Oracle ────────────────────────────────────────────────────────────────────
 async def fetch_pyth_prices(session: httpx.AsyncClient) -> dict:
     """
-    Fetch SOL/USD and JUP/USD from Pyth Hermes pull oracle.
+    Fetch SOL/USD and JUP/USD from Pyth Network pull oracle.
     Returns prices + confidence intervals.
     Circuit break triggered if confidence > PYTH_CONF_MAX_PCT.
     Includes automated zero-friction fallback if Pyth requires auth token.
@@ -269,7 +269,7 @@ async def fetch_pyth_prices(session: httpx.AsyncClient) -> dict:
         headers["Authorization"] = f"Bearer {pyth_key}"
 
     try:
-        resp = await session.get(PYTH_HERMES_URL, params=params, headers=headers, timeout=5.0)
+        resp = await session.get(PYTH_ORACLE_URL, params=params, headers=headers, timeout=5.0)
         if resp.status_code == 200:
             data = resp.json()
             result: dict = {}
@@ -290,7 +290,7 @@ async def fetch_pyth_prices(session: httpx.AsyncClient) -> dict:
             if result.get("SOL") and result.get("JUP"):
                 return result
     except Exception as e:
-        log.warning("Pyth Hermes query: %s (activating multi-rail fallback)", e)
+        log.warning("Pyth Network query: %s (activating multi-rail fallback)", e)
 
     # ── Multi-Rail Fallback: Real-time public CEX feed (Coinbase + CoinGecko / no auth / 0% US geoblock) ────
     try:

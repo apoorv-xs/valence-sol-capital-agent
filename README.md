@@ -16,7 +16,7 @@
 
 **Valence-Sol** is an enterprise-grade autonomous capital allocation agent built for **Steve Capital** and powered by **OOBE Protocol** on Solana mainnet:
 
-1. **Reads live prices** from the Pyth pull oracle (Hermes endpoint, <50ms latency) with confidence interval validation and Coinbase/CoinGecko failover
+1. **Reads live prices** from the Pyth Network pull oracle (<50ms latency) with confidence interval validation and Coinbase/CoinGecko failover
 2. **Computes momentum signals** from a 60-sample zero-allocation `numpy.float64` ring buffer
 3. **Derives target portfolio weights** using a momentum-driven allocation model with circuit breakers
 4. **Rebalances the vault** autonomously via Jupiter V6 DEX swaps when any asset deviates >5% from target
@@ -36,7 +36,7 @@
 │                    VALENCE-SOL CAPITAL AGENT                     │
 │                                                                 │
 │  ┌──────────────────────┐    ┌──────────────────────────────┐  │
-│  │   Pyth Hermes Oracle │    │   Momentum Engine            │  │
+│  │   Pyth Oracle Feed   │    │   Momentum Engine            │  │
 │  │   REST pull (<50ms)  │───▶│   (60-sample float64 ring    │  │
 │  │   SOL/USD + JUP/USD  │    │    buffer, zero-alloc)       │  │
 │  │   + confidence %     │    └──────────────┬───────────────┘  │
@@ -214,7 +214,7 @@ Verifiable on Solscan: `https://solscan.io/tx/<signature>`
 | :--- | :--- | :--- |
 | **Execution Latency & Memory** | **Sub-millisecond (0 GC pauses)** via pre-allocated `numpy.float64` ring buffers | Typical runtime reallocates JSON/dict structures every tick |
 | **Live Interactive Web Cockpit** | **60 FPS Obsidian Glass UI** on GitHub Pages ([Live Demo](https://apoorv-xs.github.io/valence-sol-capital-agent/)) | None or static plain text/table |
-| **Oracle Multi-Rail Failover** | **Pyth Hermes (<50ms)** + automatic unauthenticated Coinbase/CoinGecko failover | Single API dependency (fails or blocks under rate-limit) |
+| **Oracle Multi-Rail Failover** | **Pyth Network (<50ms)** + automatic unauthenticated Coinbase/CoinGecko failover | Single API dependency (fails or blocks under rate-limit) |
 | **Sponsor Track Parity** | **OOBE Protocol SAP MCP + MultiHopper v0 + Ace Data Cloud** adapters | Usually misses 1-2 partner tracks or requires paid API keys |
 | **On-Chain Proof-of-Reasoning** | **SHA-256 reasoning digest** burned to **Solana Memo Program** | Unsigned local log files or mocked signatures |
 | **Judge Reproduction** | **1-command dry-run** (`python agent_core.py --ticks 3`) with live quotes | Fails or crashes without mainnet private key funded |

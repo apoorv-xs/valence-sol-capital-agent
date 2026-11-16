@@ -68,7 +68,7 @@ async def handle_tool_call(name: str, arguments: Dict[str, Any]) -> Dict[str, An
             prices = await fetch_pyth_prices(session)
             return {
                 "prices": prices,
-                "source": prices.get("SOURCE", "Pyth Hermes Pull Oracle"),
+                "source": prices.get("SOURCE", "Pyth Network Pull Oracle"),
                 "status": "HEALTHY"
             }
 
@@ -89,7 +89,7 @@ async def handle_tool_call(name: str, arguments: Dict[str, Any]) -> Dict[str, An
                 "agent_name": "Valence-Sol",
                 "sap_mcp_compatible": True,
                 "features": [
-                    "Pyth Hermes sub-400ms pull oracle",
+                    "Pyth Network sub-sub-slot pull oracle",
                     "Jupiter v6 optimal split-routing",
                     "3% drawdown safe harbor circuit breaker",
                     "Solana Memo Program cryptographic reasoning audit"
