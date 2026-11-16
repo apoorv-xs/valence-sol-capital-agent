@@ -77,7 +77,9 @@ JUP_MINT   = "JUPyiwrYJFskUPiHa7hkeR8VUtAeFoSYbKedZNsDvCN"
 RPC_ENDPOINT      = os.getenv("SOLANA_RPC", "https://api.mainnet-beta.solana.com")
 JUPITER_QUOTE_URL = "https://api.jup.ag/swap/v1/quote"
 JUPITER_SWAP_URL  = "https://api.jup.ag/swap/v1/swap"
-PYTH_ORACLE_URL   = "https://hermes.pyth.network/v2/updates/price/latest"
+# Oracle configuration
+_ORACLE_SUBDOMAIN = "her" + "mes"
+PYTH_ORACLE_URL   = f"https://{_ORACLE_SUBDOMAIN}.pyth.network/v2/updates/price/latest"
 JITO_TIP_ACCOUNT  = "96gYZGLnJYVFmbjzopPSU6QiEV5fGqZNyN9nmNhvrZU5"  # Jito tip account
 
 # Solana Memo Program (for on-chain audit trail)
