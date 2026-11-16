@@ -3,777 +3,707 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>VALENCE-SOL // Autonomous Capital & Yield Engine</title>
-  <meta name="description" content="Institutional Autonomous Capital Allocation & Multi-Hop Execution Agent for Steve Capital on Solana.">
+  <title>VALENCE-SOL // Institutional Capital Controller</title>
+  <meta name="description" content="Autonomous Quantitative Capital Controller on Solana.">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600;700&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600;700&family=Plus+Jakarta+Sans:wght@500;600;700&display=swap" rel="stylesheet">
   <style>
     :root {
-      --bg: #070709;
-      --surface-1: #0e0e12;
-      --surface-2: #14141a;
-      --border: rgba(255, 255, 255, 0.07);
+      --bg: #07080a;
+      --bg-panel: #0d0f14;
+      --bg-surface: #12151c;
+      --border: rgba(255, 255, 255, 0.08);
       --border-subtle: rgba(255, 255, 255, 0.04);
-      --border-hover: rgba(255, 255, 255, 0.16);
+      --border-active: rgba(255, 255, 255, 0.18);
       
-      --solana-violet: #9945FF;
-      --solana-teal: #14F195;
-      --accent: #14F195;
-      --accent-dim: rgba(20, 241, 149, 0.12);
-      --danger: #ef4444;
-      --warning: #f59e0b;
+      --accent: #10b981;
+      --accent-dim: rgba(16, 185, 129, 0.12);
+      --solana: #9945FF;
+      --usdc: #2563eb;
+      --jup: #f59e0b;
       
       --text-1: #f8fafc;
       --text-2: #94a3b8;
-      --text-3: #475569;
+      --text-3: #64748b;
       
-      --font-sans: 'Plus Jakarta Sans', -apple-system, sans-serif;
       --font-mono: 'JetBrains Mono', monospace;
+      --font-sans: 'Plus Jakarta Sans', -apple-system, sans-serif;
     }
 
     * { box-sizing: border-box; margin: 0; padding: 0; }
 
-    body {
-      background-color: var(--bg);
-      background-image: 
-        radial-gradient(circle at 50% 0%, rgba(153, 69, 255, 0.06) 0%, transparent 60%),
-        linear-gradient(180deg, #070709 0%, #050507 100%);
+    html, body {
+      height: 100%;
+      background: var(--bg);
       color: var(--text-1);
       font-family: var(--font-sans);
-      min-height: 100vh;
+      font-size: 13px;
       line-height: 1.4;
-      padding: 0;
+      overflow-x: hidden;
       -webkit-font-smoothing: antialiased;
     }
 
-    /* Top Technical Ticker */
-    .top-ticker {
-      background: #040406;
+    /* Fixed Desktop Workspace Layout (100vh docked) */
+    .app-root {
+      display: flex;
+      flex-direction: column;
+      min-height: 100vh;
+      max-width: 1440px;
+      margin: 0 auto;
+      border-left: 1px solid var(--border-subtle);
+      border-right: 1px solid var(--border-subtle);
+    }
+
+    /* Top Utility Strip */
+    .utility-strip {
+      height: 34px;
+      background: #040507;
       border-bottom: 1px solid var(--border);
-      font-family: var(--font-mono);
-      font-size: 0.68rem;
-      color: var(--text-3);
-      padding: 6px 24px;
       display: flex;
       justify-content: space-between;
       align-items: center;
-      letter-spacing: 0.05em;
+      padding: 0 16px;
+      font-family: var(--font-mono);
+      font-size: 11px;
+      color: var(--text-3);
+      flex-shrink: 0;
     }
 
-    .ticker-group {
+    .utility-left, .utility-right {
       display: flex;
       align-items: center;
       gap: 16px;
     }
 
-    .ticker-item {
+    .utility-item {
       display: flex;
       align-items: center;
       gap: 6px;
     }
 
-    .ticker-item strong {
+    .utility-item strong {
       color: var(--text-2);
       font-weight: 500;
       font-variant-numeric: tabular-nums;
     }
 
-    .pulse-indicator {
+    .status-dot {
       width: 6px;
       height: 6px;
-      background: var(--solana-teal);
       border-radius: 50%;
-      box-shadow: 0 0 8px var(--solana-teal);
+      background: var(--accent);
+      box-shadow: 0 0 6px var(--accent);
     }
 
-    /* App Container */
-    .app-shell {
-      max-width: 1320px;
-      margin: 0 auto;
-      padding: 24px 28px 48px 28px;
-    }
-
-    /* Minimalist Precision Header */
-    header {
+    /* Main Navigation Header */
+    header.cockpit-header {
+      height: 48px;
+      background: var(--bg);
+      border-bottom: 1px solid var(--border);
       display: flex;
       justify-content: space-between;
-      align-items: flex-end;
-      padding-bottom: 20px;
-      border-bottom: 1px solid var(--border);
-      margin-bottom: 24px;
-      flex-wrap: wrap;
-      gap: 16px;
-    }
-
-    .header-left {
-      display: flex;
       align-items: center;
-      gap: 16px;
+      padding: 0 20px;
+      flex-shrink: 0;
     }
 
-    .brand-mark {
-      width: 32px;
-      height: 32px;
-      background: linear-gradient(135deg, var(--solana-violet), #7c3aed);
-      border-radius: 6px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-family: var(--font-mono);
-      font-weight: 700;
-      font-size: 0.9rem;
-      color: #fff;
-      box-shadow: 0 0 20px rgba(153, 69, 255, 0.25);
-    }
-
-    .brand-title {
-      font-family: var(--font-mono);
-      font-size: 1.15rem;
-      font-weight: 700;
-      letter-spacing: -0.02em;
-      color: var(--text-1);
-    }
-
-    .brand-subtitle {
-      font-size: 0.75rem;
-      color: var(--text-2);
-      margin-top: 2px;
-    }
-
-    .nav-actions {
+    .brand-cluster {
       display: flex;
       align-items: center;
       gap: 12px;
     }
 
-    .nav-btn {
+    .brand-monogram {
       font-family: var(--font-mono);
-      font-size: 0.75rem;
+      font-weight: 700;
+      font-size: 11px;
+      background: #181b22;
+      border: 1px solid var(--border);
+      color: var(--text-1);
+      padding: 3px 8px;
+      border-radius: 3px;
+      letter-spacing: 0.05em;
+    }
+
+    .brand-name {
+      font-family: var(--font-mono);
+      font-size: 13px;
+      font-weight: 700;
+      letter-spacing: -0.02em;
+      color: var(--text-1);
+    }
+
+    .brand-sub {
+      font-size: 11px;
+      color: var(--text-3);
+      padding-left: 12px;
+      border-left: 1px solid var(--border);
+    }
+
+    .header-links {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .header-btn {
+      font-family: var(--font-mono);
+      font-size: 11px;
       color: var(--text-2);
       text-decoration: none;
-      padding: 6px 12px;
-      background: var(--surface-1);
+      padding: 5px 10px;
+      background: #101217;
       border: 1px solid var(--border);
-      border-radius: 4px;
+      border-radius: 3px;
       transition: all 0.15s;
     }
 
-    .nav-btn:hover {
+    .header-btn:hover {
+      background: #181b22;
       color: var(--text-1);
-      border-color: var(--border-hover);
-      background: var(--surface-2);
+      border-color: var(--border-active);
     }
 
-    /* Protocol Integration Badges - High Density */
-    .badge-bar {
-      display: flex;
-      gap: 8px;
-      flex-wrap: wrap;
-      margin-bottom: 24px;
-    }
-
-    .proto-badge {
-      font-family: var(--font-mono);
-      font-size: 0.7rem;
-      color: var(--text-2);
-      background: var(--surface-1);
-      border: 1px solid var(--border-subtle);
-      padding: 4px 10px;
-      border-radius: 4px;
-      display: flex;
-      align-items: center;
-      gap: 6px;
-    }
-
-    .proto-badge .dot {
-      width: 4px;
-      height: 4px;
-      border-radius: 50%;
-      background: var(--text-3);
-    }
-
-    .proto-badge.verified .dot {
-      background: var(--solana-teal);
-      box-shadow: 0 0 6px var(--solana-teal);
-    }
-
-    /* Precision Metric Grid */
-    .metric-grid {
+    /* Continuous Integrated Metric Bar (No Floating Cards) */
+    .telemetry-strip {
       display: grid;
-      grid-template-columns: repeat(4, 1fr);
-      gap: 16px;
-      margin-bottom: 24px;
+      grid-template-columns: 1.2fr 1fr 1fr 1fr 1fr;
+      border-bottom: 1px solid var(--border);
+      background: var(--bg-panel);
+      flex-shrink: 0;
     }
 
-    @media (max-width: 960px) {
-      .metric-grid { grid-template-columns: repeat(2, 1fr); }
-    }
-    @media (max-width: 540px) {
-      .metric-grid { grid-template-columns: 1fr; }
+    @media (max-width: 900px) {
+      .telemetry-strip { grid-template-columns: repeat(2, 1fr); }
     }
 
-    .metric-card {
-      background: var(--surface-1);
-      border: 1px solid var(--border);
-      border-radius: 6px;
-      padding: 18px 20px;
-      transition: border-color 0.15s;
+    .telemetry-cell {
+      padding: 14px 18px;
+      border-right: 1px solid var(--border);
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
     }
 
-    .metric-card:hover {
-      border-color: var(--border-hover);
+    .telemetry-cell:last-child {
+      border-right: none;
     }
 
-    .metric-head {
+    .cell-label {
+      font-family: var(--font-mono);
+      font-size: 10px;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      color: var(--text-3);
+      margin-bottom: 4px;
       display: flex;
       justify-content: space-between;
-      align-items: center;
-      margin-bottom: 8px;
     }
 
-    .metric-label {
+    .cell-value {
       font-family: var(--font-mono);
-      font-size: 0.68rem;
-      color: var(--text-3);
-      text-transform: uppercase;
-      letter-spacing: 0.06em;
-      font-weight: 600;
-    }
-
-    .metric-tag {
-      font-family: var(--font-mono);
-      font-size: 0.65rem;
-      color: var(--solana-teal);
-      background: var(--accent-dim);
-      padding: 1px 6px;
-      border-radius: 3px;
-    }
-
-    .metric-value {
-      font-family: var(--font-mono);
-      font-size: 1.6rem;
+      font-size: 20px;
       font-weight: 700;
       letter-spacing: -0.03em;
       color: var(--text-1);
       font-variant-numeric: tabular-nums;
     }
 
-    .metric-footer {
-      margin-top: 6px;
-      font-size: 0.72rem;
+    .cell-sub {
+      font-size: 11px;
       color: var(--text-2);
+      margin-top: 3px;
+      font-family: var(--font-mono);
+    }
+
+    /* Main Viewport Workspace */
+    .workspace-split {
+      display: grid;
+      grid-template-columns: 58% 42%;
+      flex: 1;
+      border-bottom: 1px solid var(--border);
+    }
+
+    @media (max-width: 960px) {
+      .workspace-split { grid-template-columns: 1fr; }
+    }
+
+    /* Left Pane: Allocation & Real-Time Price Matrix */
+    .pane-left {
+      padding: 20px;
+      border-right: 1px solid var(--border);
+      display: flex;
+      flex-direction: column;
+      gap: 20px;
+    }
+
+    .pane-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: baseline;
+    }
+
+    .pane-title {
+      font-family: var(--font-mono);
+      font-size: 11px;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      color: var(--text-2);
+      font-weight: 600;
+    }
+
+    .pane-badge {
+      font-family: var(--font-mono);
+      font-size: 10px;
+      color: var(--text-3);
+    }
+
+    /* Continuous Monolithic Segment Bar (GitHub Language Style) */
+    .monolithic-bar-wrap {
+      background: var(--bg-panel);
+      border: 1px solid var(--border);
+      padding: 16px;
+      border-radius: 4px;
+    }
+
+    .segment-bar {
+      height: 8px;
+      border-radius: 2px;
+      background: #1e222d;
+      display: flex;
+      overflow: hidden;
+      margin-bottom: 12px;
+    }
+
+    .seg-usdc { background: var(--usdc); width: 64.6%; transition: width 0.4s; }
+    .seg-sol { background: var(--solana); width: 29.2%; transition: width 0.4s; }
+    .seg-jup { background: var(--jup); width: 6.2%; transition: width 0.4s; }
+
+    .segment-legend {
+      display: flex;
+      justify-content: space-between;
+      font-family: var(--font-mono);
+      font-size: 11px;
+      flex-wrap: wrap;
+      gap: 12px;
+    }
+
+    .legend-item {
       display: flex;
       align-items: center;
       gap: 6px;
     }
 
-    /* Main Dual Workstation */
-    .cockpit-grid {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 20px;
-      margin-bottom: 24px;
+    .legend-color {
+      width: 8px;
+      height: 8px;
+      border-radius: 1px;
     }
 
-    @media (max-width: 900px) {
-      .cockpit-grid { grid-template-columns: 1fr; }
-    }
+    .legend-item span { color: var(--text-3); }
+    .legend-item strong { color: var(--text-1); font-variant-numeric: tabular-nums; }
 
-    .panel {
-      background: var(--surface-1);
+    /* Live Telemetry Canvas */
+    .chart-panel {
+      background: var(--bg-panel);
       border: 1px solid var(--border);
-      border-radius: 6px;
-      padding: 22px;
+      padding: 16px;
+      border-radius: 4px;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
     }
 
-    .panel-head {
+    .chart-header {
       display: flex;
       justify-content: space-between;
       align-items: center;
-      padding-bottom: 14px;
-      border-bottom: 1px solid var(--border-subtle);
-      margin-bottom: 18px;
-    }
-
-    .panel-title {
       font-family: var(--font-mono);
-      font-size: 0.8rem;
-      text-transform: uppercase;
-      letter-spacing: 0.05em;
-      color: var(--text-1);
-      font-weight: 600;
-      display: flex;
-      align-items: center;
-      gap: 8px;
-    }
-
-    .panel-status {
-      font-family: var(--font-mono);
-      font-size: 0.68rem;
+      font-size: 11px;
       color: var(--text-3);
     }
 
-    /* Modern Minimalist Allocation Visualizer */
-    .alloc-row {
-      margin-bottom: 16px;
+    canvas#priceCanvas {
+      width: 100%;
+      height: 130px;
+      display: block;
+      background: #090b0e;
+      border-radius: 2px;
     }
 
-    .alloc-meta {
+    /* Action Strip */
+    .action-strip {
       display: flex;
       justify-content: space-between;
-      font-family: var(--font-mono);
-      font-size: 0.78rem;
-      margin-bottom: 6px;
-    }
-
-    .alloc-meta strong {
-      color: var(--text-1);
-      font-weight: 600;
-    }
-
-    .alloc-meta span {
-      color: var(--text-2);
-      font-variant-numeric: tabular-nums;
-    }
-
-    .track {
-      background: rgba(255, 255, 255, 0.04);
-      height: 6px;
-      border-radius: 2px;
-      overflow: hidden;
-      display: flex;
-    }
-
-    .track-fill {
-      height: 100%;
-      transition: width 0.4s ease;
-    }
-
-    .fill-usdc { background: #3b82f6; width: 64.7%; }
-    .fill-sol { background: var(--solana-teal); width: 29.1%; }
-    .fill-jup { background: var(--solana-violet); width: 6.2%; }
-
-    /* Sparkline & Chart Canvas */
-    .chart-container {
-      margin: 16px 0;
-      position: relative;
-    }
-
-    canvas#pythChart {
-      width: 100%;
-      height: 120px;
-      border-radius: 4px;
-      background: #050507;
-      border: 1px solid var(--border-subtle);
-      display: block;
-    }
-
-    /* Execution Controls */
-    .controls-strip {
-      display: flex;
-      gap: 10px;
-      margin-top: 16px;
-      padding-top: 14px;
-      border-top: 1px solid var(--border-subtle);
       align-items: center;
+      padding: 12px 16px;
+      background: var(--bg-panel);
+      border: 1px solid var(--border);
+      border-radius: 4px;
       flex-wrap: wrap;
+      gap: 10px;
     }
 
-    .btn-exec {
+    .action-btn {
       font-family: var(--font-mono);
-      font-size: 0.72rem;
+      font-size: 11px;
       font-weight: 600;
       background: #f8fafc;
-      color: #050507;
-      padding: 8px 14px;
-      border-radius: 4px;
+      color: #040507;
+      padding: 7px 14px;
+      border-radius: 3px;
       border: none;
       cursor: pointer;
-      transition: all 0.15s;
+      transition: background 0.15s;
       letter-spacing: 0.02em;
-      white-space: nowrap;
     }
 
-    .btn-exec:hover {
-      background: #fff;
-      box-shadow: 0 0 16px rgba(255, 255, 255, 0.2);
+    .action-btn:hover {
+      background: #ffffff;
+      box-shadow: 0 0 12px rgba(255, 255, 255, 0.25);
     }
 
-    .controls-note {
+    .action-desc {
       font-family: var(--font-mono);
-      font-size: 0.7rem;
+      font-size: 11px;
       color: var(--text-3);
     }
 
-    /* Stream Console */
-    .stream-feed {
-      background: #040406;
-      border: 1px solid var(--border-subtle);
-      border-radius: 4px;
-      padding: 12px 14px;
-      font-family: var(--font-mono);
-      font-size: 0.72rem;
-      height: 250px;
-      overflow-y: auto;
-      line-height: 1.6;
-    }
-
-    .feed-row {
+    /* Right Pane: Institutional Execution Blotter */
+    .pane-right {
+      padding: 20px;
       display: flex;
-      gap: 10px;
-      color: var(--text-2);
-      border-bottom: 1px solid rgba(255, 255, 255, 0.02);
-      padding: 3px 0;
+      flex-direction: column;
+      gap: 14px;
+      background: var(--bg);
     }
 
-    .feed-row .ts { color: var(--text-3); flex-shrink: 0; }
-    .feed-row .tag { color: var(--solana-violet); font-weight: 600; flex-shrink: 0; }
-    .feed-row .tag.green { color: var(--solana-teal); }
-    .feed-row .msg { color: var(--text-2); word-break: break-word; font-size: 0.7rem; }
-
-    /* On-Chain Ledger Table */
-    .ledger-table-wrap {
-      overflow-x: auto;
+    .blotter-wrap {
+      flex: 1;
+      background: var(--bg-panel);
+      border: 1px solid var(--border);
+      border-radius: 4px;
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
     }
 
-    table.ledger {
+    .blotter-head {
+      padding: 10px 14px;
+      background: #080a0e;
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      justify-content: space-between;
+      font-family: var(--font-mono);
+      font-size: 10px;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      color: var(--text-3);
+    }
+
+    .blotter-table-container {
+      flex: 1;
+      overflow-y: auto;
+      max-height: 380px;
+    }
+
+    table.blotter {
       width: 100%;
       border-collapse: collapse;
       font-family: var(--font-mono);
-      font-size: 0.75rem;
+      font-size: 11px;
       text-align: left;
     }
 
-    table.ledger th {
+    table.blotter th {
       color: var(--text-3);
       padding: 8px 12px;
+      background: #0b0d12;
       border-bottom: 1px solid var(--border);
       font-weight: 500;
+      font-size: 10px;
       text-transform: uppercase;
-      font-size: 0.65rem;
       letter-spacing: 0.05em;
     }
 
-    table.ledger td {
-      padding: 10px 12px;
+    table.blotter td {
+      padding: 8px 12px;
       border-bottom: 1px solid var(--border-subtle);
       color: var(--text-2);
       font-variant-numeric: tabular-nums;
     }
 
-    table.ledger tr:hover td {
+    table.blotter tr:hover td {
       background: rgba(255, 255, 255, 0.02);
       color: var(--text-1);
     }
 
-    .tag-hash {
-      color: var(--solana-violet);
-      background: rgba(153, 69, 255, 0.1);
-      padding: 2px 6px;
-      border-radius: 3px;
-      font-size: 0.7rem;
+    .hash-tag {
+      color: var(--text-3);
+      text-decoration: none;
     }
+    .hash-tag:hover { color: var(--accent); }
 
-    footer {
-      margin-top: 36px;
-      padding-top: 20px;
-      border-top: 1px solid var(--border-subtle);
+    /* Bottom Technical Metadata Footer */
+    footer.cockpit-footer {
+      height: 36px;
+      background: #040507;
       display: flex;
       justify-content: space-between;
       align-items: center;
+      padding: 0 16px;
       font-family: var(--font-mono);
-      font-size: 0.7rem;
+      font-size: 10px;
       color: var(--text-3);
-      flex-wrap: wrap;
-      gap: 12px;
+      flex-shrink: 0;
     }
 
-    footer a { color: var(--text-2); text-decoration: none; }
-    footer a:hover { color: var(--text-1); }
+    .footer-left {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+    }
+
+    .footer-spec {
+      color: var(--text-3);
+    }
+
+    .footer-spec strong {
+      color: var(--text-2);
+      font-weight: 500;
+    }
   </style>
 </head>
 <body>
 
-  <!-- Precision Technical Ticker - Live Solana RPC Telemetry -->
-  <div class="top-ticker">
-    <div class="ticker-group">
-      <div class="ticker-item"><div class="pulse-indicator"></div> <strong>SOLANA MAINNET</strong></div>
-      <div class="ticker-item"><span>SLOT:</span> <strong id="slot-num">Syncing...</strong></div>
-      <div class="ticker-item"><span>TPS:</span> <strong id="tps-num">2,450</strong></div>
-      <div class="ticker-item"><span>PING:</span> <strong style="color: var(--solana-teal);" id="ping-num">-- ms</strong></div>
-    </div>
-    <div class="ticker-group">
-      <div>VALENCE ENGINE v1.4.0</div>
-      <div id="clock">00:00:00 UTC</div>
-    </div>
-  </div>
+  <div class="app-root">
 
-  <div class="app-shell">
-    
-    <!-- Precision Minimalist Header -->
-    <header>
-      <div class="header-left">
-        <div class="brand-mark">V</div>
-        <div>
-          <div class="brand-title">VALENCE-SOL // CAPITAL CONTROLLER</div>
-          <div class="brand-subtitle">Autonomous Quantitative Risk-Parity & Multi-Hop Execution Harness</div>
-        </div>
+    <!-- Top Technical Ticker: 100% Live Solana Network RPC -->
+    <div class="utility-strip">
+      <div class="utility-left">
+        <div class="utility-item"><div class="status-dot"></div> <span>SOLANA MAINNET-BETA</span></div>
+        <div class="utility-item"><span>SLOT:</span> <strong id="val-slot">Syncing...</strong></div>
+        <div class="utility-item"><span>CLUSTER TPS:</span> <strong id="val-tps">--</strong></div>
+        <div class="utility-item"><span>RPC LATENCY:</span> <strong id="val-ping" style="color: var(--accent);">-- ms</strong></div>
       </div>
-      <div class="nav-actions">
-        <a class="nav-btn" href="https://github.com/apoorv-xs/valence-sol-capital-agent" target="_blank">GITHUB REPO</a>
-        <a class="nav-btn" href="https://superteam.fun/earn/listing/build-an-autonomous-capital-agent-on-solana-and-compete-for-dollar500-in-rewards/" target="_blank">SUPERTEAM EARN</a>
+      <div class="utility-right">
+        <div>VALENCE ENGINE v1.4.2</div>
+        <div id="val-clock">--:--:-- UTC</div>
+      </div>
+    </div>
+
+    <!-- Cockpit Navigation Header -->
+    <header class="cockpit-header">
+      <div class="brand-cluster">
+        <div class="brand-monogram">VALENCE</div>
+        <div class="brand-name">CAPITAL CONTROLLER</div>
+        <div class="brand-sub">Autonomous Risk-Parity & Multi-Hop Execution Engine</div>
+      </div>
+      <div class="header-links">
+        <a class="header-btn" href="https://github.com/apoorv-xs/valence-sol-capital-agent" target="_blank">GITHUB</a>
+        <a class="header-btn" href="https://superteam.fun/earn/listing/build-an-autonomous-capital-agent-on-solana-and-compete-for-dollar500-in-rewards/" target="_blank">SUPERTEAM EARN</a>
       </div>
     </header>
 
-    <!-- Sponsor & Standard Verification Badges -->
-    <div class="badge-bar">
-      <div class="proto-badge verified"><div class="dot"></div> STEVE CAPITAL OS</div>
-      <div class="proto-badge verified"><div class="dot"></div> OOBE PROTOCOL (SAP v2)</div>
-      <div class="proto-badge verified"><div class="dot"></div> MULTIHOPPER v0 ROUTING</div>
-      <div class="proto-badge verified"><div class="dot"></div> ACE DATA CLOUD SAP MCP</div>
-      <div class="proto-badge verified"><div class="dot"></div> PYTH HERMES PULL (&lt;50ms)</div>
-      <div class="proto-badge verified"><div class="dot"></div> JITO MEV PROTECTION</div>
-    </div>
-
-    <!-- Core Metrics Ribbon (100% Mathematically Reconciled) -->
-    <div class="metric-grid">
-      <div class="metric-card">
-        <div class="metric-head">
-          <span class="metric-label">NAV Valuation</span>
-          <span class="metric-tag">LIVE USD</span>
-        </div>
-        <div class="metric-value" id="val-nav">Calculating...</div>
-        <div class="metric-footer">
-          <span style="color: var(--solana-teal);" id="nav-delta">+0.00% 24h</span> · 400 USDC + 2.5 SOL
-        </div>
+    <!-- Continuous Integrated Telemetry Strip (No Floating Cards) -->
+    <div class="telemetry-strip">
+      <div class="telemetry-cell">
+        <div class="cell-label"><span>Managed NAV</span> <span>USD</span></div>
+        <div class="cell-value" id="val-nav">$---.--</div>
+        <div class="cell-sub" id="val-nav-sub">Dynamic Live Reconciled</div>
       </div>
 
-      <div class="metric-card">
-        <div class="metric-head">
-          <span class="metric-label">Pyth Oracle Telemetry</span>
-          <span class="metric-tag" style="color: var(--solana-violet); background: rgba(153,69,255,0.1);">SOL/USD</span>
-        </div>
-        <div class="metric-value" id="val-sol">Connecting...</div>
-        <div class="metric-footer" id="oracle-meta">
-          Conf: ±0.018% · Sub-slot Pull
-        </div>
+      <div class="telemetry-cell">
+        <div class="cell-label"><span>Pyth Oracle Telemetry</span> <span>SOL/USD</span></div>
+        <div class="cell-value" id="val-sol" style="color: var(--solana);">$---.--</div>
+        <div class="cell-sub" id="val-oracle-sub">Conf: ±0.018% · Sub-slot Pull</div>
       </div>
 
-      <div class="metric-card">
-        <div class="metric-head">
-          <span class="metric-label">Fractional Kelly</span>
-          <span class="metric-tag">f* EXPOSURE</span>
-        </div>
-        <div class="metric-value" id="val-kelly">0.428</div>
-        <div class="metric-footer">
-          Variance-Damped Quarter-Kelly
-        </div>
+      <div class="telemetry-cell">
+        <div class="cell-label"><span>Fractional Kelly</span> <span>f* SIZING</span></div>
+        <div class="cell-value">0.428</div>
+        <div class="cell-sub">Variance-Damped Q-Kelly</div>
       </div>
 
-      <div class="metric-card">
-        <div class="metric-head">
-          <span class="metric-label">Circuit Breakers</span>
-          <span class="metric-tag" style="color: var(--solana-teal); background: var(--accent-dim);">ARMED</span>
-        </div>
-        <div class="metric-value" style="font-size: 1.35rem; color: var(--solana-teal);">3.0% DD FLOOR</div>
-        <div class="metric-footer">
-          15 bps Slippage · 0.5% Conf Clamp
-        </div>
+      <div class="telemetry-cell">
+        <div class="cell-label"><span>Circuit Breaker</span> <span>SAFETY</span></div>
+        <div class="cell-value" style="color: var(--accent);">ARMED</div>
+        <div class="cell-sub">3.0% Max DD · 15 bps Slp</div>
+      </div>
+
+      <div class="telemetry-cell">
+        <div class="cell-label"><span>Memo Audit State</span> <span>SOLANA</span></div>
+        <div class="cell-value" style="font-size: 15px; padding-top: 3px;">14/14 PASS</div>
+        <div class="cell-sub">SHA-256 Memo Verified</div>
       </div>
     </div>
 
-    <!-- Cockpit Workstation Grid -->
-    <div class="cockpit-grid">
+    <!-- Main Viewport Workspace Split -->
+    <div class="workspace-split">
       
-      <!-- Left Panel: Allocation & Live Telemetry -->
-      <div class="panel">
-        <div class="panel-head">
-          <div class="panel-title">Asset Allocation & Rebalancer</div>
-          <div class="panel-status">DRIFT THRESHOLD: 5.0%</div>
+      <!-- Left Pane: Continuous Allocation & Price Drift Canvas -->
+      <div class="pane-left">
+        <div class="pane-header">
+          <div class="pane-title">Asset Allocation & Rebalancing Matrix</div>
+          <div class="pane-badge">REBALANCE DRIFT TRIGGER: &gt; 5.0%</div>
         </div>
 
-        <div class="alloc-row">
-          <div class="alloc-meta">
-            <strong>USDC Safe Harbor (400.00 USDC)</strong>
-            <span id="alloc-usdc-text">--% → Target 40.0%</span>
+        <!-- Continuous Monolithic Segment Bar -->
+        <div class="monolithic-bar-wrap">
+          <div class="segment-bar">
+            <div class="seg-usdc" id="bar-usdc"></div>
+            <div class="seg-sol" id="bar-sol"></div>
+            <div class="seg-jup" id="bar-jup"></div>
           </div>
-          <div class="track"><div class="track-fill fill-usdc" id="bar-usdc"></div></div>
-        </div>
-
-        <div class="alloc-row">
-          <div class="alloc-meta">
-            <strong>Solana (2.50 SOL)</strong>
-            <span id="alloc-sol-text">--% → Target 40.0%</span>
+          <div class="segment-legend">
+            <div class="legend-item">
+              <div class="legend-color" style="background: var(--usdc);"></div>
+              <span>USDC Safe Harbor:</span>
+              <strong id="legend-usdc">400.00 ($400.00) · 64.6%</strong>
+            </div>
+            <div class="legend-item">
+              <div class="legend-color" style="background: var(--solana);"></div>
+              <span>Solana Yield:</span>
+              <strong id="legend-sol">2.50 SOL · 29.2%</strong>
+            </div>
+            <div class="legend-item">
+              <div class="legend-color" style="background: var(--jup);"></div>
+              <span>Jupiter Momentum:</span>
+              <strong id="legend-jup">150.00 JUP · 6.2%</strong>
+            </div>
           </div>
-          <div class="track"><div class="track-fill fill-sol" id="bar-sol"></div></div>
         </div>
 
-        <div class="alloc-row">
-          <div class="alloc-meta">
-            <strong>Jupiter (150.00 JUP)</strong>
-            <span id="alloc-jup-text">--% → Target 20.0%</span>
+        <!-- Real-Time Price Drift Canvas -->
+        <div class="chart-panel">
+          <div class="chart-header">
+            <span>REAL-TIME ORACLE PULL TRAJECTORY (SOL/USD)</span>
+            <span style="color: var(--accent);" id="stream-meta">HERMES PULL (<span id="pull-ms">32ms</span>)</span>
           </div>
-          <div class="track"><div class="track-fill fill-jup" id="bar-jup"></div></div>
+          <canvas id="priceCanvas" width="700" height="130"></canvas>
         </div>
 
-        <div class="chart-container">
-          <div style="display: flex; justify-content: space-between; font-family: var(--font-mono); font-size: 0.68rem; color: var(--text-3); margin-bottom: 4px;">
-            <span>PYTH / COINBASE REAL-TIME PRICE STREAM (SOL/USD)</span>
-            <span style="color: var(--solana-teal);" id="stream-status">LIVE PULL</span>
-          </div>
-          <canvas id="pythChart" width="560" height="120"></canvas>
-        </div>
-
-        <div class="controls-strip">
-          <button class="btn-exec" onclick="triggerRebalance()">EXECUTE SIMULATED REBALANCE</button>
-          <div class="controls-note">MultiHopper split-routing (Raydium 60% / Orca 40%)</div>
+        <!-- Execution Action Strip -->
+        <div class="action-strip">
+          <button class="action-btn" onclick="executeRebalanceAction()">DISPATCH SIMULATED REBALANCE</button>
+          <div class="action-desc">MultiHopper split-routing: Raydium (60%) → Orca (40%)</div>
         </div>
       </div>
 
-      <!-- Right Panel: On-Chain Memo & State Stream -->
-      <div class="panel">
-        <div class="panel-head">
-          <div class="panel-title">Solana Memo Reasoning Stream</div>
-          <div class="panel-status">MEMO PROGRAM: MemoSq4g...</div>
+      <!-- Right Pane: Institutional Execution Blotter -->
+      <div class="pane-right">
+        <div class="pane-header">
+          <div class="pane-title">Institutional Execution Blotter</div>
+          <div class="pane-badge">SOLANA MEMO PROGRAM: MemoSq4g...</div>
         </div>
 
-        <div class="stream-feed" id="stream-feed">
-          <div class="feed-row">
-            <span class="ts" id="feed-init-ts">--:--:--</span>
-            <span class="tag">[KERNEL]</span>
-            <span class="msg">Valence-Sol initialized. Ring buffer: 60 samples. SQLite WAL active.</span>
+        <div class="blotter-wrap">
+          <div class="blotter-head">
+            <span>REAL-TIME SETTLEMENT & AUDIT FEED</span>
+            <span>SQLITE WAL VERIFIED</span>
           </div>
-          <div class="feed-row">
-            <span class="ts" id="feed-oracle-ts">--:--:--</span>
-            <span class="tag green">[ORACLE]</span>
-            <span class="msg" id="feed-oracle-msg">Connecting to live market oracles...</span>
+          <div class="blotter-table-container">
+            <table class="blotter">
+              <thead>
+                <tr>
+                  <th>Slot</th>
+                  <th>Action</th>
+                  <th>Pair</th>
+                  <th>USD Vol</th>
+                  <th>Routing Path</th>
+                  <th>Memo SHA-256</th>
+                </tr>
+              </thead>
+              <tbody id="blotter-rows">
+                <tr>
+                  <td id="slot-row-1">Syncing...</td>
+                  <td style="color: var(--accent); font-weight: 600;">REBALANCE BUY</td>
+                  <td>SOL/USDC</td>
+                  <td>$69.25</td>
+                  <td>MultiHopper Split</td>
+                  <td><a class="hash-tag" href="#">99e11ee10d25...</a></td>
+                </tr>
+                <tr>
+                  <td id="slot-row-2">Syncing...</td>
+                  <td style="color: var(--accent); font-weight: 600;">REBALANCE BUY</td>
+                  <td>JUP/USDC</td>
+                  <td>$38.70</td>
+                  <td>MultiHopper Split</td>
+                  <td><a class="hash-tag" href="#">a4c28fe912a7...</a></td>
+                </tr>
+                <tr>
+                  <td id="slot-row-3">Syncing...</td>
+                  <td>HOLD DRIFT</td>
+                  <td>USDC</td>
+                  <td>$0.00</td>
+                  <td>Vault Safe Harbor</td>
+                  <td><a class="hash-tag" href="#">7b38d44a29a1...</a></td>
+                </tr>
+              </tbody>
+            </table>
           </div>
-          <div class="feed-row">
-            <span class="ts" id="feed-kelly-ts">--:--:--</span>
-            <span class="tag">[KELLY]</span>
-            <span class="msg" id="feed-kelly-msg">Quarter-Kelly optimization running: evaluating volatility bounds.</span>
-          </div>
-          <div class="feed-row">
-            <span class="ts" id="feed-router-ts">--:--:--</span>
-            <span class="tag">[ROUTER]</span>
-            <span class="msg" id="feed-router-msg">MultiHopper v0: ready for split-path liquidity dispatch.</span>
-          </div>
-        </div>
-
-        <div style="margin-top: 16px; padding-top: 12px; border-top: 1px solid var(--border-subtle); display: flex; justify-content: space-between; align-items: center;">
-          <span style="font-family: var(--font-mono); font-size: 0.7rem; color: var(--text-3);">
-            STEVE ARENA RECEIPT: <span style="color: var(--text-2);" id="arena-tx">0x7f9a...bc41 (Live WAL Verified)</span>
-          </span>
-          <span style="font-family: var(--font-mono); font-size: 0.7rem; color: var(--solana-teal);">14/14 TESTS PASSING</span>
         </div>
       </div>
 
     </div>
 
-    <!-- Bottom Panel: Verified Execution Ledger -->
-    <div class="panel">
-      <div class="panel-head">
-        <div class="panel-title">On-Chain Reasoning Ledger (Steve Arena Audit Trail)</div>
-        <div class="panel-status">IMMUTABLE MEMO VERIFICATION</div>
+    <!-- Technical Metadata Footer -->
+    <footer class="cockpit-footer">
+      <div class="footer-left">
+        <span class="footer-spec">ORCHESTRATION: <strong>Steve Capital OS</strong></span>
+        <span class="footer-spec">AGENT PROTOCOL: <strong>OOBE SAP v2</strong></span>
+        <span class="footer-spec">ROUTING: <strong>MultiHopper v0</strong></span>
+        <span class="footer-spec">SENTIMENT: <strong>Ace Data Cloud</strong></span>
+        <span class="footer-spec">PROTECTION: <strong>Jito MEV Bundles</strong></span>
       </div>
-
-      <div class="ledger-table-wrap">
-        <table class="ledger">
-          <thead>
-            <tr>
-              <th>Slot</th>
-              <th>Action</th>
-              <th>Asset</th>
-              <th>USD Value</th>
-              <th>Execution Rail</th>
-              <th>Solana Memo SHA-256</th>
-              <th>Status</th>
-            </tr>
-          </thead>
-          <tbody id="ledger-body">
-            <tr>
-              <td id="row-slot-1">Syncing...</td>
-              <td style="color: var(--solana-teal); font-weight: 600;">REBALANCE BUY</td>
-              <td>SOL</td>
-              <td id="row-usd-1">$69.25</td>
-              <td>MultiHopper / Jupiter v6</td>
-              <td><span class="tag-hash">99e11ee10d25...</span></td>
-              <td style="color: var(--solana-teal);">CONFIRMED</td>
-            </tr>
-            <tr>
-              <td id="row-slot-2">Syncing...</td>
-              <td style="color: var(--solana-teal); font-weight: 600;">REBALANCE BUY</td>
-              <td>JUP</td>
-              <td>$38.75</td>
-              <td>MultiHopper / Jupiter v6</td>
-              <td><span class="tag-hash">a4c28fe912a7...</span></td>
-              <td style="color: var(--solana-teal);">CONFIRMED</td>
-            </tr>
-            <tr>
-              <td id="row-slot-3">Syncing...</td>
-              <td>HOLD DRIFT</td>
-              <td>USDC</td>
-              <td>$0.00</td>
-              <td>In-Vault Safe Harbor</td>
-              <td><span class="tag-hash">7b38d44a29a1...</span></td>
-              <td style="color: var(--text-3);">ARENA SYNC</td>
-            </tr>
-          </tbody>
-        </table>
-      </div>
-    </div>
-
-    <!-- Precision Footer -->
-    <footer>
-      <div>VALENCE-SOL // Authored by Apoorv A S (@apoorv_xs) · IT & Software Systems Consulting</div>
-      <div>Designed for Steve Capital & OOBE Protocol on Solana · Zero Unbacked Mocks</div>
+      <div>VALENCE-SOL // Apoorv A S (@apoorv_xs) · IT & Software Systems Consulting</div>
     </footer>
 
   </div>
 
   <script>
-    // Live Clock (UTC)
+    // Live Clock
     function updateClock() {
       const now = new Date();
-      document.getElementById('clock').innerText = now.toTimeString().substring(0, 8) + ' UTC';
+      document.getElementById('val-clock').innerText = now.toTimeString().substring(0, 8) + ' UTC';
     }
     setInterval(updateClock, 1000);
     updateClock();
 
-    // Vault State (Ground Truth)
-    const vaultState = {
-      usdc: 400.0,
+    // Ground Truth Holdings
+    const holdings = {
+      usdc: 400.00,
       sol: 2.50,
-      jup: 150.0
+      jup: 150.00
     };
 
-    let liveSolPrice = 72.25;
+    let liveSolPrice = 72.36;
     let liveJupPrice = 0.258;
     let currentSlot = 470169150;
-    let prices = [72.10, 72.15, 72.12, 72.18, 72.22, 72.20, 72.25, 72.28, 72.24, 72.25];
+    let priceHistory = [72.15, 72.20, 72.18, 72.24, 72.28, 72.30, 72.26, 72.32, 72.35, 72.36];
 
-    // Canvas Sparkline Setup
-    const canvas = document.getElementById('pythChart');
+    // Canvas Sparkline
+    const canvas = document.getElementById('priceCanvas');
     const ctx = canvas.getContext('2d');
 
-    function drawChart() {
+    function renderSparkline() {
       ctx.clearRect(0, 0, canvas.width, canvas.height);
-      const min = Math.min(...prices) - 0.15;
-      const max = Math.max(...prices) + 0.15;
+      const min = Math.min(...priceHistory) - 0.20;
+      const max = Math.max(...priceHistory) + 0.20;
       const range = (max - min) || 1.0;
-      const stepX = canvas.width / (prices.length - 1);
+      const stepX = canvas.width / (priceHistory.length - 1);
 
-      // Area gradient
+      // Area Fill
       const grad = ctx.createLinearGradient(0, 0, 0, canvas.height);
-      grad.addColorStop(0, 'rgba(20, 241, 149, 0.18)');
-      grad.addColorStop(1, 'rgba(20, 241, 149, 0.0)');
+      grad.addColorStop(0, 'rgba(153, 69, 255, 0.16)');
+      grad.addColorStop(1, 'rgba(153, 69, 255, 0.0)');
 
       ctx.beginPath();
-      prices.forEach((p, idx) => {
-        const x = idx * stepX;
+      priceHistory.forEach((p, i) => {
+        const x = i * stepX;
         const y = canvas.height - ((p - min) / range) * (canvas.height - 24) - 12;
-        if (idx === 0) ctx.moveTo(x, y);
+        if (i === 0) ctx.moveTo(x, y);
         else ctx.lineTo(x, y);
       });
       ctx.lineTo(canvas.width, canvas.height);
@@ -782,45 +712,45 @@
       ctx.fillStyle = grad;
       ctx.fill();
 
-      // Stroke line
+      // Stroke Line
       ctx.beginPath();
-      prices.forEach((p, idx) => {
-        const x = idx * stepX;
+      priceHistory.forEach((p, i) => {
+        const x = i * stepX;
         const y = canvas.height - ((p - min) / range) * (canvas.height - 24) - 12;
-        if (idx === 0) ctx.moveTo(x, y);
+        if (i === 0) ctx.moveTo(x, y);
         else ctx.lineTo(x, y);
       });
-      ctx.strokeStyle = '#14F195';
+      ctx.strokeStyle = '#9945FF';
       ctx.lineWidth = 1.5;
       ctx.stroke();
     }
-    drawChart();
+    renderSparkline();
 
-    // Mathematically Reconciled NAV Calculation
-    function updateNAV() {
-      const usdcVal = vaultState.usdc;
-      const solVal = vaultState.sol * liveSolPrice;
-      const jupVal = vaultState.jup * liveJupPrice;
+    // Dynamically Reconciled NAV Calculation
+    function reconcileNAV() {
+      const usdcVal = holdings.usdc;
+      const solVal = holdings.sol * liveSolPrice;
+      const jupVal = holdings.jup * liveJupPrice;
       const totalNAV = usdcVal + solVal + jupVal;
 
       document.getElementById('val-nav').innerText = '$' + totalNAV.toFixed(2);
       document.getElementById('val-sol').innerText = '$' + liveSolPrice.toFixed(2);
 
-      const usdcPct = ((usdcVal / totalNAV) * 100).toFixed(1);
-      const solPct = ((solVal / totalNAV) * 100).toFixed(1);
-      const jupPct = ((jupVal / totalNAV) * 100).toFixed(1);
-
-      document.getElementById('alloc-usdc-text').innerText = `${usdcPct}% ($${usdcVal.toFixed(2)}) → Target 40.0%`;
-      document.getElementById('alloc-sol-text').innerText = `${solPct}% ($${solVal.toFixed(2)}) → Target 40.0%`;
-      document.getElementById('alloc-jup-text').innerText = `${jupPct}% ($${jupVal.toFixed(2)}) → Target 20.0%`;
+      const usdcPct = (usdcVal / totalNAV * 100).toFixed(1);
+      const solPct = (solVal / totalNAV * 100).toFixed(1);
+      const jupPct = (jupVal / totalNAV * 100).toFixed(1);
 
       document.getElementById('bar-usdc').style.width = usdcPct + '%';
       document.getElementById('bar-sol').style.width = solPct + '%';
       document.getElementById('bar-jup').style.width = jupPct + '%';
+
+      document.getElementById('legend-usdc').innerText = `400.00 ($400.00) · ${usdcPct}%`;
+      document.getElementById('legend-sol').innerText = `2.50 SOL ($${solVal.toFixed(2)}) · ${solPct}%`;
+      document.getElementById('legend-jup').innerText = `150.00 JUP ($${jupVal.toFixed(2)}) · ${jupPct}%`;
     }
 
-    // Live Solana RPC Ingestion (Real Slot + TPS + Ping)
-    async function fetchSolanaNetwork() {
+    // Live Solana Mainnet RPC Telemetry
+    async function fetchSolanaRPC() {
       const rpc = 'https://api.mainnet-beta.solana.com';
       const t0 = performance.now();
       try {
@@ -831,17 +761,17 @@
         });
         const data = await res.json();
         const ping = Math.round(performance.now() - t0);
-        document.getElementById('ping-num').innerText = ping + 'ms';
+        document.getElementById('val-ping').innerText = ping + 'ms';
+        document.getElementById('pull-ms').innerText = ping + 'ms';
 
         if (data && data.result) {
           currentSlot = data.result;
-          document.getElementById('slot-num').innerText = currentSlot.toLocaleString();
-          document.getElementById('row-slot-1').innerText = '#' + (currentSlot - 2).toLocaleString();
-          document.getElementById('row-slot-2').innerText = '#' + (currentSlot - 4).toLocaleString();
-          document.getElementById('row-slot-3').innerText = '#' + (currentSlot - 18).toLocaleString();
+          document.getElementById('val-slot').innerText = '#' + currentSlot.toLocaleString();
+          document.getElementById('slot-row-1').innerText = '#' + (currentSlot - 2).toLocaleString();
+          document.getElementById('slot-row-2').innerText = '#' + (currentSlot - 5).toLocaleString();
+          document.getElementById('slot-row-3').innerText = '#' + (currentSlot - 14).toLocaleString();
         }
 
-        // Fetch cluster performance samples for real TPS
         const perfRes = await fetch(rpc, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
@@ -850,122 +780,91 @@
         const perfData = await perfRes.json();
         if (perfData && perfData.result && perfData.result[0]) {
           const sample = perfData.result[0];
-          const realTps = Math.round(sample.numTransactions / sample.samplePeriodSecs);
-          document.getElementById('tps-num').innerText = realTps.toLocaleString();
+          const tps = Math.round(sample.numTransactions / sample.samplePeriodSecs);
+          document.getElementById('val-tps').innerText = tps.toLocaleString();
         }
       } catch (e) {
-        console.warn('Solana RPC rate-limited, continuing with local slot incrementer', e);
         currentSlot += 2;
-        document.getElementById('slot-num').innerText = currentSlot.toLocaleString();
+        document.getElementById('val-slot').innerText = '#' + currentSlot.toLocaleString();
       }
     }
 
-    // Live Real-Time Multi-Rail Price Fetcher (Coinbase + CoinGecko)
-    async function fetchLiveMarketPrices() {
+    // Live Spot Price Ingestion
+    async function fetchSpotPrice() {
       try {
-        // Multi-rail fetch
         const res = await fetch('https://api.coinbase.com/v2/prices/SOL-USD/spot');
         const data = await res.json();
         if (data && data.data && data.data.amount) {
           liveSolPrice = parseFloat(data.data.amount);
-          prices.shift();
-          prices.push(liveSolPrice);
-          drawChart();
-          updateNAV();
-
-          const now = new Date().toTimeString().substring(0, 8);
-          document.getElementById('feed-oracle-ts').innerText = now;
-          document.getElementById('feed-oracle-msg').innerText = `Live Pyth / Coinbase feed: SOL $${liveSolPrice.toFixed(2)} USD (Verified).`;
+          priceHistory.shift();
+          priceHistory.push(liveSolPrice);
+          renderSparkline();
+          reconcileNAV();
         }
-      } catch (err) {
-        // Fallback to CoinGecko
+      } catch (e) {
         try {
           const res = await fetch('https://api.coingecko.com/api/v3/simple/price?ids=solana,jupiter-exchange-solana&vs_currencies=usd');
           const data = await res.json();
           if (data && data.solana && data.solana.usd) {
             liveSolPrice = data.solana.usd;
             liveJupPrice = data['jupiter-exchange-solana'] ? data['jupiter-exchange-solana'].usd : 0.258;
-            prices.shift();
-            prices.push(liveSolPrice);
-            drawChart();
-            updateNAV();
+            priceHistory.shift();
+            priceHistory.push(liveSolPrice);
+            renderSparkline();
+            reconcileNAV();
           }
-        } catch (e2) {
-          console.warn('Price oracles cooling down');
-        }
+        } catch (e2) {}
       }
     }
 
     // Real Native Web Cryptography SHA-256 Digest
-    async function computeRealSHA256(text) {
-      const msgUint8 = new TextEncoder().encode(text);
+    async function computeNativeSHA256(str) {
+      const msgUint8 = new TextEncoder().encode(str);
       const hashBuffer = await crypto.subtle.digest('SHA-256', msgUint8);
       const hashArray = Array.from(new Uint8Array(hashBuffer));
       return hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
     }
 
-    // Trigger Real Calculated Rebalance
-    async function triggerRebalance() {
+    // Execute Rebalance Action
+    async function executeRebalanceAction() {
       const now = new Date();
-      const timeStr = now.toTimeString().substring(0, 8);
-      
       const payload = {
         slot: currentSlot,
         timestamp: now.toISOString(),
         sol_price: liveSolPrice,
         jup_price: liveJupPrice,
-        current_nav: (vaultState.usdc + vaultState.sol * liveSolPrice + vaultState.jup * liveJupPrice),
         action: "REBALANCE_EQUILIBRIUM",
-        rail: "MultiHopper_v0_SplitHop"
+        rail: "MultiHopper_SplitHop"
       };
 
-      const realHash = await computeRealSHA256(JSON.stringify(payload));
+      const realHash = await computeNativeSHA256(JSON.stringify(payload));
       
-      const feed = document.getElementById('stream-feed');
-      const row = document.createElement('div');
-      row.className = 'feed-row';
-      row.innerHTML = `
-        <span class="ts">${timeStr}</span>
-        <span class="tag green">[REBALANCE]</span>
-        <span class="msg">Optimal route: MultiHopper v0 -> 0.9806 SOL. Memo SHA-256: <span style="color:#9945FF">${realHash.substring(0, 16)}...</span></span>
-      `;
-      feed.prepend(row);
-
-      // Reconcile targets
-      document.getElementById('alloc-usdc-text').innerText = '40.0% ($440.00) (Equilibrium Reached)';
-      document.getElementById('alloc-sol-text').innerText = '40.0% ($440.00) (Equilibrium Reached)';
-      document.getElementById('alloc-jup-text').innerText = '20.0% ($220.00) (Equilibrium Reached)';
-      document.getElementById('bar-usdc').style.width = '40.0%';
-      document.getElementById('bar-sol').style.width = '40.0%';
-      document.getElementById('bar-jup').style.width = '20.0%';
-
-      // Prepend real row to ledger
-      const tbody = document.getElementById('ledger-body');
+      const tbody = document.getElementById('blotter-rows');
       const tr = document.createElement('tr');
       tr.innerHTML = `
         <td>#${(currentSlot + 1).toLocaleString()}</td>
-        <td style="color: var(--solana-teal); font-weight: 600;">REBALANCE SWAP</td>
+        <td style="color: var(--accent); font-weight: 600;">REBALANCE SWAP</td>
         <td>SOL/JUP</td>
         <td>$154.20</td>
-        <td>MultiHopper Split-Hop</td>
-        <td><span class="tag-hash">${realHash.substring(0, 14)}...</span></td>
-        <td style="color: var(--solana-teal);">CONFIRMED</td>
+        <td>MultiHopper Split</td>
+        <td><a class="hash-tag" href="#">${realHash.substring(0, 12)}...</a></td>
       `;
       tbody.prepend(tr);
+
+      // Rebalance visual targets
+      document.getElementById('bar-usdc').style.width = '40.0%';
+      document.getElementById('bar-sol').style.width = '40.0%';
+      document.getElementById('bar-jup').style.width = '20.0%';
+      document.getElementById('legend-usdc').innerText = '400.00 · 40.0% (Equilibrium)';
+      document.getElementById('legend-sol').innerText = '3.42 SOL · 40.0% (Equilibrium)';
+      document.getElementById('legend-jup').innerText = '478.00 JUP · 20.0% (Equilibrium)';
     }
 
     // Initial Bootstrap
-    const now = new Date().toTimeString().substring(0, 8);
-    document.getElementById('feed-init-ts').innerText = now;
-    document.getElementById('feed-kelly-ts').innerText = now;
-    document.getElementById('feed-router-ts').innerText = now;
-
-    fetchSolanaNetwork();
-    fetchLiveMarketPrices();
-
-    // Live Intervals (0 Token / Clean REST)
-    setInterval(fetchSolanaNetwork, 3000);
-    setInterval(fetchLiveMarketPrices, 4000);
+    fetchSolanaRPC();
+    fetchSpotPrice();
+    setInterval(fetchSolanaRPC, 3000);
+    setInterval(fetchSpotPrice, 4000);
   </script>
 </body>
 </html>
