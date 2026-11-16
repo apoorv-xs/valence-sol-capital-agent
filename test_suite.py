@@ -199,5 +199,43 @@ class TestLedgerPersistence(unittest.TestCase):
         self.assertEqual(count, 1)
 
 
+class TestPartnerTracks(unittest.TestCase):
+    def test_multihopper_routing_evaluation(self):
+        """MultiHopper router must compute net output with fee rebate."""
+        from multihopper_router import MultiHopperRouter
+        router = MultiHopperRouter(rebate_bps=5)
+        direct_quote = {"outAmount": "1000000"}
+        route = router.evaluate_multi_hop_route("USDC_MINT", "SOL_MINT", 1000000, direct_quote)
+        self.assertTrue(route["is_optimal"])
+        self.assertGreater(route["estimated_out_units"], 1000000)
+        self.assertEqual(route["fee_rebate_bps"], 5)
+
+    def test_multihopper_priority_fee_escalation(self):
+        """Priority fees must scale dynamically with network congestion."""
+        from multihopper_router import MultiHopperRouter
+        router = MultiHopperRouter()
+        low_fee = router.compute_priority_fee_micro_lamports("low")
+        high_fee = router.compute_priority_fee_micro_lamports("high")
+        self.assertGreater(high_fee, low_fee)
+
+    def test_ace_data_cloud_conviction_scoring(self):
+        """Ace Data Cloud client must return structured sentiment conviction scores."""
+        from ace_data_client import AceDataCloudClient
+        client = AceDataCloudClient()
+        conviction = client.get_market_conviction("SOL")
+        self.assertIn("conviction_score", conviction)
+        self.assertGreater(conviction["conviction_score"], 0.0)
+        self.assertEqual(conviction["status"], "HEALTHY")
+
+    def test_ace_data_cloud_half_kelly_modulation(self):
+        """Ace Data Cloud conviction must modulate Half-Kelly sizing as a Bayesian prior."""
+        from ace_data_client import AceDataCloudClient
+        client = AceDataCloudClient()
+        base_f = 0.40
+        modulated_f = client.modulate_half_kelly(base_f, "SOL")
+        self.assertIsInstance(modulated_f, float)
+        self.assertGreater(modulated_f, 0.0)
+
+
 if __name__ == "__main__":
     unittest.main(verbosity=2)
