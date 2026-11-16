@@ -17,6 +17,7 @@
 5. **Embeds reasoning hash** in every swap via the Solana Memo Program (cryptographic on-chain audit trail verified on Steve Arena)
 6. **Logs all events** to a SQLite WAL ledger (`solana_capital_state.db`)
 7. **Runs dry by default** — judges can verify the full reasoning pipeline in 1 second without funding a wallet
+8. **Exposes MCP Server** — provides standard Model Context Protocol (SAP) interface for OOBE Protocol, MultiHopper, and Ace Data Cloud
 
 **Zero GC pressure in hot path:** Pre-allocated `numpy.float64` ring buffers. Single persistent `httpx.AsyncClient` with keep-alive connection pooling. Fully compatible with Steve Capital's programmable guardrail framework.
 
@@ -53,31 +54,42 @@
 │  ┌──────────────────────────────────────────────────────────┐  │
 │  │   On-Chain Audit Trail (Solana Memo Program)             │  │
 │  │   SHA-256(tick + prices + balances + targets + momentum) │  │
-│  │   Embedded in every swap tx → verifiable on Solscan      │  │
+│  │   Embedded in every swap tx → verified on Steve Arena    │  │
 │  └──────────────────────────────────────────────────────────┘  │
 │                              │                                  │
 │  ┌───────────────────────────▼──────────────────────────────┐  │
 │  │   SQLite WAL Ledger (solana_capital_state.db)            │  │
 │  │   oracle_ticks | rebalance_events | tx signatures        │  │
 │  └──────────────────────────────────────────────────────────┘  │
+│                              │                                  │
+│  ┌───────────────────────────▼──────────────────────────────┐  │
+│  │   Model Context Protocol (MCP) Server                    │  │
+│  │   JSON-RPC toolset for OOBE / Steve Arena / SAP          │  │
+│  └──────────────────────────────────────────────────────────┘  │
 └─────────────────────────────────────────────────────────────────┘
 ```
 
-## Allocation Model
+---
 
-| Condition | USDC | SOL | JUP |
-|-----------|------|-----|-----|
-| Neutral baseline | 40% | 40% | 20% |
-| SOL momentum > +2% | 30% | 50% | 20% |
-| JUP momentum > +3% | 35% | 40% | 25% |
-| Any momentum < −3% | 60% | 30% | 10% |
-| **Circuit break (oracle/drawdown)** | **100%** | **0%** | **0%** |
+## OOBE Protocol & Steve Arena Integration
+
+Hermes-Sol is engineered to natively interface with **Steve Capital (OOBE Protocol)** and the **Solana Agentic Protocol (SAP)**:
+
+- **Model Context Protocol (MCP) Server (`hermes_mcp_server.py`)**: Exposes structured JSON-RPC tools (`get_vault_state`, `get_oracle_prices`, `evaluate_rebalance`, `get_steve_arena_status`) so external AI agents, Steve Arena coordinators, MultiHopper routers, and Ace Data Cloud can orchestrate Hermes-Sol programmatically.
+- **Steve Arena On-Chain Verification**: Every live rebalance transaction embeds the SHA-256 decision hash into the Solana Memo Program (`MemoSq4gqABAXKb96qnH8TysNcWxMyWCqXgDLGmfcHr`), creating an immutable cryptographic audit record registered directly on Steve Arena.
+
+```bash
+# Launch Hermes-Sol MCP Server (SAP bridge for OOBE / Steve Capital)
+python hermes_mcp_server.py
+```
+
+---
 
 ## Circuit Breakers
 
 | Condition | Action |
 |-----------|--------|
-| Pyth confidence interval > 0.5% | Liquidate to 100% USDC immediately |
+| Pyth confidence interval > 0.5% | Safe harbor (rebalance 100% to USDC) |
 | Portfolio drawdown > 3.0% | Liquidate to 100% USDC immediately |
 | Swap slippage quote > 50 bps | Reject swap entirely |
 | Swap USD delta < $10 | Skip (dust prevention) |
@@ -135,14 +147,16 @@ python agent_core.py --live --confirm-live-risk
 
 ---
 
-## Requirements
+## State Ledger Schema
 
-```
-solana>=0.34.0
-solders>=0.21.0
-httpx>=0.27.0
-numpy>=1.26.0
-python-dotenv>=1.0.0
+All state is recorded to SQLite WAL (`solana_capital_state.db`):
+
+- `oracle_ticks`: timestamp, sol_price, sol_conf, jup_price, jup_conf
+- `rebalance_events`: tick, asset, direction, usd_amount, slippage_bps, tx_signature, reasoning_hash, is_dry_run
+
+Query the ledger:
+```bash
+sqlite3 solana_capital_state.db "SELECT * FROM rebalance_events ORDER BY id DESC LIMIT 5;"
 ```
 
 ---
