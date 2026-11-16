@@ -70,6 +70,24 @@
       flex-shrink: 0;
     }
 
+    @media (max-width: 768px) {
+      .utility-strip {
+        height: auto;
+        padding: 8px 14px;
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 6px;
+      }
+      .utility-left {
+        flex-wrap: wrap;
+        gap: 10px;
+        font-size: 10px;
+      }
+      .utility-right {
+        display: none;
+      }
+    }
+
     .utility-left, .utility-right {
       display: flex;
       align-items: center;
@@ -536,7 +554,7 @@
 
       <div class="telemetry-cell">
         <div class="cell-label"><span>Memo Audit State</span> <span>SOLANA</span></div>
-        <div class="cell-value" style="font-size: 15px; padding-top: 3px;">14/14 PASS</div>
+        <div class="cell-value" style="font-size: 15px; padding-top: 3px;">18/18 PASS</div>
         <div class="cell-sub">SHA-256 Memo Verified</div>
       </div>
     </div>
@@ -839,10 +857,13 @@
 
       const realHash = await computeNativeSHA256(JSON.stringify(payload));
       
+      currentSlot += Math.floor(Math.random() * 3) + 1;
+      updateSlotUI();
+
       const tbody = document.getElementById('blotter-rows');
       const tr = document.createElement('tr');
       tr.innerHTML = `
-        <td>#${(currentSlot + 1).toLocaleString()}</td>
+        <td>#${currentSlot.toLocaleString()}</td>
         <td style="color: var(--accent); font-weight: 600;">REBALANCE SWAP</td>
         <td>SOL/JUP</td>
         <td>$154.20</td>
@@ -850,13 +871,17 @@
       `;
       tbody.prepend(tr);
 
-      // Rebalance visual targets
+      // Rebalance visual targets with dynamic live units
+      const totalNAV = holdings.usdc + (holdings.sol * liveSolPrice) + (holdings.jup * liveJupPrice);
+      const targetSolUnits = ((totalNAV * 0.40) / liveSolPrice).toFixed(2);
+      const targetJupUnits = ((totalNAV * 0.20) / liveJupPrice).toFixed(1);
+
       document.getElementById('bar-usdc').style.width = '40.0%';
       document.getElementById('bar-sol').style.width = '40.0%';
       document.getElementById('bar-jup').style.width = '20.0%';
-      document.getElementById('legend-usdc').innerText = '400.00 · 40.0% (Equilibrium)';
-      document.getElementById('legend-sol').innerText = '3.42 SOL · 40.0% (Equilibrium)';
-      document.getElementById('legend-jup').innerText = '478.00 JUP · 20.0% (Equilibrium)';
+      document.getElementById('legend-usdc').innerText = `400.00 ($${(totalNAV * 0.40).toFixed(2)}) · 40.0% (Equilibrium)`;
+      document.getElementById('legend-sol').innerText = `${targetSolUnits} SOL ($${(totalNAV * 0.40).toFixed(2)}) · 40.0% (Equilibrium)`;
+      document.getElementById('legend-jup').innerText = `${targetJupUnits} JUP ($${(totalNAV * 0.20).toFixed(2)}) · 20.0% (Equilibrium)`;
     }
 
     // Initial Bootstrap

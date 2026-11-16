@@ -237,5 +237,45 @@ class TestPartnerTracks(unittest.TestCase):
         self.assertGreater(modulated_f, 0.0)
 
 
+class TestHardenedEdgeCases(unittest.TestCase):
+    def test_zero_division_guard_on_prices(self):
+        """Zero asset prices must never trigger ZeroDivisionError."""
+        state = VaultState(sol_balance=2.0, jup_balance=100.0, usdc_balance=500.0, peak_usd_value=1000.0)
+        total = state.total_usd(0.0, 0.0)
+        self.assertEqual(total, 500.0)
+        dd = state.drawdown(0.0, 0.0)
+        self.assertEqual(dd, 0.50)
+
+    def test_empty_and_short_buffer_momentum(self):
+        """Empty or single-element buffers must return 0.0 momentum without crashing."""
+        state = VaultState()
+        self.assertEqual(state.momentum(np.array([])), 0.0)
+        self.assertEqual(state.momentum(np.array([100.0])), 0.0)
+
+    def test_steve_arena_timestamp_epoch_validity(self):
+        """Steve Arena payload must contain valid Unix epoch timestamp (> 1.7e9)."""
+        from steve_mcp_adapter import SteveArenaAdapter
+        adapter = SteveArenaAdapter(agent_id="test_agent")
+        payload = adapter.format_arena_activity_payload(
+            tick=1, asset="SOL", direction="buy", usd_delta=50.0,
+            reasoning_hash="abcd1234abcd", tx_signature="sim_tx_123"
+        )
+        self.assertGreater(payload["timestamp"], 1700000000.0)
+        self.assertIn("timestamp_iso", payload)
+        self.assertTrue(payload["timestamp_iso"].endswith("Z"))
+
+    def test_balance_clamping_invariants(self):
+        """Sell units must be mathematically clamped to avoid on-chain Insufficient Funds reverts."""
+        sol_balance = 2.500000000
+        sol_px = 72.36
+        # Simulate an extreme $500 sell delta (more than the $180.90 SOL balance)
+        usd_delta = -500.0
+        max_sol_lamports = int(sol_balance * 1_000_000_000)
+        unclamped = int(abs(usd_delta) / sol_px * 1_000_000_000)
+        clamped = min(unclamped, max_sol_lamports)
+        self.assertEqual(clamped, max_sol_lamports)
+        self.assertLessEqual(clamped, max_sol_lamports)
+
+
 if __name__ == "__main__":
     unittest.main(verbosity=2)

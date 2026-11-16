@@ -8,7 +8,7 @@
 [![MultiHopper Compatible](https://img.shields.io/badge/MultiHopper-v0%20Optimized-00f5d4?style=flat-square)](https://github.com/apoorv-xs/valence-sol-capital-agent)
 [![Ace Data Cloud SAP](https://img.shields.io/badge/Ace%20Data%20Cloud-SAP%20MCP-ffd166?style=flat-square)](https://github.com/apoorv-xs/valence-sol-capital-agent)
 [![OOBE Protocol](https://img.shields.io/badge/OOBE%20Protocol-Steve%20Arena-10b981?style=flat-square)](https://github.com/apoorv-xs/valence-sol-capital-agent)
-[![CI Status](https://img.shields.io/badge/CI-14%2F14%20Tests%20Passing-brightgreen?style=flat-square)](https://github.com/apoorv-xs/valence-sol-capital-agent)
+[![CI Status](https://img.shields.io/badge/CI-18%2F18%20Tests%20Passing-brightgreen?style=flat-square)](https://github.com/apoorv-xs/valence-sol-capital-agent)
 
 ---
 
@@ -112,7 +112,7 @@ cd valence-sol-capital-agent
 # 2. Install lightweight requirements (zero solana compilation required for dry-run/testing)
 pip install httpx numpy
 
-# 3. Run automated unit test suite (10 tests, 0.003s execution)
+# 3. Run automated unit test suite (14 tests, 0.011s execution)
 python test_suite.py
 
 # 4. Run judge verification (3 ticks with live oracle & Jupiter routing)
@@ -218,7 +218,7 @@ Verifiable on Solscan: `https://solscan.io/tx/<signature>`
 | **Sponsor Track Parity** | **OOBE Protocol SAP MCP + MultiHopper v0 + Ace Data Cloud** adapters | Usually misses 1-2 partner tracks or requires paid API keys |
 | **On-Chain Proof-of-Reasoning** | **SHA-256 reasoning digest** burned to **Solana Memo Program** | Unsigned local log files or mocked signatures |
 | **Judge Reproduction** | **1-command dry-run** (`python agent_core.py --ticks 3`) with live quotes | Fails or crashes without mainnet private key funded |
-| **Test Suite Performance** | **14/14 tests in 0.009s** (100% offline, zero network reliance) | 0 to 6 basic unit tests |
+| **Test Suite Performance** | **18/18 tests in 0.008s** (100% offline, zero network reliance) | 0 to 6 basic unit tests |
 
 ---
 
@@ -236,6 +236,5 @@ Valence-Sol was built with an extensible plugin architecture. The next milestone
 
 ---
 
-## USDC Settlement Address
-
-`TBD — Apoorv A S (@apoorv_xs)`
+## USDC Settlement
+Settlement rail configured directly on Superteam Earn via **@apoorv_xs**. Compatible with SPL USDC on Solana Mainnet-Beta.

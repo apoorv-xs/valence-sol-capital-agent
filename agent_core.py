@@ -342,8 +342,10 @@ async def get_jupiter_quote(
 
     if DRY_RUN:
         # High-fidelity simulated quote matching Jupiter v6 schema
-        sol_px = prices.get("SOL", 215.0) if prices else 215.0
-        jup_px = prices.get("JUP", 1.05) if prices else 1.05
+        sol_val = prices.get("SOL", 72.40) if prices else 72.40
+        jup_val = prices.get("JUP", 0.26) if prices else 0.26
+        sol_px = float(sol_val) if sol_val and float(sol_val) > 0.0 else 72.40
+        jup_px = float(jup_val) if jup_val and float(jup_val) > 0.0 else 0.26
 
         if input_mint == USDC_MINT and output_mint == SOL_MINT:
             usd_amt = amount_units / 1e6
@@ -445,18 +447,28 @@ def compute_target_weights(state: VaultState, prices: dict) -> dict[str, float]:
     sol_mom = state.momentum(state.sol_prices)
     jup_mom = state.momentum(state.jup_prices)
 
-    w_usdc = 0.40
-    w_sol  = 0.40
+    # Mathematical Half-Kelly Volatility Sizing Engine:
+    # f* = 0.5 * (mu - r_f) / sigma^2 * (1 - drawdown_penalty)
+    r_f = 0.0001
+    n = min(state.price_head, PRICE_WINDOW)
+    sol_buf = state.sol_prices[:n] if state.price_head < PRICE_WINDOW else state.sol_prices
+    if len(sol_buf) >= 5:
+        sol_returns = np.diff(sol_buf) / sol_buf[:-1]
+        sol_var = float(np.var(sol_returns)) if len(sol_returns) > 0 else 0.0001
+        sol_var = max(sol_var, 0.00005) # bound variance floor
+        dd_penalty = max(0.0, 1.0 - (dd / MAX_DRAWDOWN))
+        kelly_tilt = 0.5 * ((sol_mom - r_f) / sol_var) * 0.001 * dd_penalty
+        kelly_tilt = max(-0.15, min(0.15, kelly_tilt)) # bound tilt between [-15%, +15%]
+    else:
+        kelly_tilt = 0.10 if sol_mom > 0.02 else (-0.10 if sol_mom < -0.02 else 0.0)
+
+    w_usdc = 0.40 - kelly_tilt
+    w_sol  = 0.40 + kelly_tilt
     w_jup  = 0.20
 
-    if sol_mom > 0.02:
-        w_sol  += 0.10
-        w_usdc -= 0.10
     if jup_mom > 0.03:
         w_jup  += 0.05
         w_usdc -= 0.05
-    if sol_mom < -0.03 or jup_mom < -0.03:
-        w_usdc, w_sol, w_jup = 0.60, 0.30, 0.10
 
     return {"USDC": max(0.0, w_usdc), "SOL": max(0.0, w_sol), "JUP": max(0.0, w_jup)}
 
@@ -473,6 +485,12 @@ async def rebalance_vault(
 ) -> None:
     sol_px = prices.get("SOL", 1.0)
     jup_px = prices.get("JUP", 1.0)
+
+    # Zero & negative price guard
+    if sol_px <= 0.0 or jup_px <= 0.0:
+        log.warning("Invalid non-positive price detected (SOL=%.4f, JUP=%.4f) — skipping rebalance", sol_px, jup_px)
+        return
+
     total  = state.total_usd(sol_px, jup_px)
 
     if total < 1.0:
@@ -504,20 +522,33 @@ async def rebalance_vault(
         log.info("[REBALANCE] %s %s deviation=%.2f%% ($%.2f)",
                  direction.upper(), asset, deviation * 100, abs(usd_delta))
 
-        # Determine swap direction
+        # Determine swap direction with balance clamping to prevent on-chain reverts
         if direction == "buy":
-            usdc_units = int(abs(usd_delta) * 1_000_000)
+            max_usdc = int(state.usdc_balance * 1_000_000)
+            usdc_units = min(int(abs(usd_delta) * 1_000_000), max_usdc)
+            if usdc_units < int(MIN_SWAP_USDC * 1_000_000):
+                continue
             out_mint   = SOL_MINT if asset == "SOL" else JUP_MINT
             quote = await get_jupiter_quote(session, USDC_MINT, out_mint, usdc_units, prices=prices)
         else:
             if asset == "SOL":
-                in_units = int(abs(usd_delta) / sol_px * 1_000_000_000)
+                max_sol = int(state.sol_balance * 1_000_000_000)
+                in_units = min(int(abs(usd_delta) / sol_px * 1_000_000_000), max_sol)
+                if in_units <= 0:
+                    continue
                 quote = await get_jupiter_quote(session, SOL_MINT, USDC_MINT, in_units, prices=prices)
             else:
-                in_units = int(abs(usd_delta) / jup_px * 1_000_000)
+                max_jup = int(state.jup_balance * 1_000_000)
+                in_units = min(int(abs(usd_delta) / jup_px * 1_000_000), max_jup)
+                if in_units <= 0:
+                    continue
                 quote = await get_jupiter_quote(session, JUP_MINT, USDC_MINT, in_units, prices=prices)
 
         if quote:
+            price_impact = float(quote.get("priceImpactPct", 0.0))
+            if price_impact > 0.015:
+                log.warning("Jupiter quote price impact %.2f%% exceeds 1.50%% limit — skipping swap", price_impact * 100)
+                continue
             slippage_bps = quote.get("slippageBps", MAX_SLIPPAGE_BPS)
             tx_sig = await execute_jupiter_swap(
                 session, rpc, keypair, quote, reasoning_hash

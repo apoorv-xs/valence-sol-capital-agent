@@ -11,6 +11,7 @@ Author: Apoorv A S (@apoorv_xs)
 
 import os
 import json
+import time
 import asyncio
 from typing import Dict, Any, Optional
 
@@ -65,7 +66,8 @@ class SteveArenaAdapter:
             "tx_signature": tx_signature,
             "memo_program_proof": True,
             "settlement_rail": "Jupiter v6 DEX",
-            "timestamp": asyncio.get_event_loop().time()
+            "timestamp": time.time(),
+            "timestamp_iso": time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime())
         }
 
     # SAP MCP Tool Definitions for Ace Data Cloud / MultiHopper Interop

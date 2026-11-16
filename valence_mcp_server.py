@@ -30,14 +30,14 @@ from agent_core import (
 import httpx
 
 logging.basicConfig(level=logging.INFO, format="[%(asctime)s] %(levelname)s %(message)s")
-log = logging.getLogger("hermes-mcp")
+log = logging.getLogger("valence-mcp")
 
 # Standard Mock / Live Vault State
 _vault = VaultState(
     sol_balance=2.5,
     jup_balance=150.0,
     usdc_balance=400.0,
-    peak_usd_value=615.0,
+    peak_usd_value=620.0,
     tick=1
 )
 
@@ -47,8 +47,8 @@ async def handle_tool_call(name: str, arguments: Dict[str, Any]) -> Dict[str, An
     async with httpx.AsyncClient(timeout=8.0) as session:
         if name == "get_vault_state":
             prices = await fetch_pyth_prices(session)
-            sol_px = prices.get("SOL", 70.0)
-            jup_px = prices.get("JUP", 0.25)
+            sol_px = prices.get("SOL", 72.35)
+            jup_px = prices.get("JUP", 0.258)
             total = _vault.total_usd(sol_px, jup_px)
             dd = _vault.drawdown(sol_px, jup_px)
             return {
@@ -101,19 +101,16 @@ async def handle_tool_call(name: str, arguments: Dict[str, Any]) -> Dict[str, An
 
 
 async def main():
-    """Simple JSON-RPC stdin/stdout loop for MCP clients."""
+    """Cross-platform JSON-RPC stdin/stdout loop for MCP clients."""
     log.info("Valence-Sol MCP Server listening (SAP/OOBE Protocol bridge)...")
     loop = asyncio.get_event_loop()
-    reader = asyncio.StreamReader()
-    protocol = asyncio.StreamReaderProtocol(reader)
-    await loop.connect_read_pipe(lambda: protocol, sys.stdin)
 
     while True:
-        line = await reader.readline()
+        line = await loop.run_in_executor(None, sys.stdin.readline)
         if not line:
             break
         try:
-            req = json.loads(line.decode().strip())
+            req = json.loads(line.strip())
             req_id = req.get("id")
             tool_name = req.get("params", {}).get("name", "")
             args = req.get("params", {}).get("arguments", {})
