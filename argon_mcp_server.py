@@ -1,5 +1,5 @@
 """
-Hermes-Sol: Model Context Protocol (MCP) Server Interface
+Argon-Sol: Model Context Protocol (MCP) Server Interface
 ==========================================================
 Enables Steve Capital (OOBE Protocol), MultiHopper, and Ace Data Cloud
 autonomous orchestrators to inspect vault metrics and trigger rebalancing
@@ -86,7 +86,7 @@ async def handle_tool_call(name: str, arguments: Dict[str, Any]) -> Dict[str, An
             return {
                 "protocol": "OOBE Protocol / Steve Capital",
                 "arena": "Steve Arena Leaderboard",
-                "agent_name": "Hermes-Sol",
+                "agent_name": "Argon-Sol",
                 "sap_mcp_compatible": True,
                 "features": [
                     "Pyth Hermes sub-400ms pull oracle",
@@ -102,7 +102,7 @@ async def handle_tool_call(name: str, arguments: Dict[str, Any]) -> Dict[str, An
 
 async def main():
     """Simple JSON-RPC stdin/stdout loop for MCP clients."""
-    log.info("Hermes-Sol MCP Server listening (SAP/OOBE Protocol bridge)...")
+    log.info("Argon-Sol MCP Server listening (SAP/OOBE Protocol bridge)...")
     loop = asyncio.get_event_loop()
     reader = asyncio.StreamReader()
     protocol = asyncio.StreamReaderProtocol(reader)
