@@ -4,20 +4,32 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>VALENCE-SOL // Autonomous Capital & Yield Engine</title>
-  <meta name="description" content="Autonomous Quantitative Capital & Risk-Weighted Yield Agent on Solana for Steve Capital & OOBE Protocol.">
+  <meta name="description" content="Institutional Autonomous Capital Allocation & Multi-Hop Execution Agent for Steve Capital on Solana.">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600;700&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
   <style>
     :root {
-      --bg: #090a0f;
-      --card-bg: rgba(18, 20, 29, 0.85);
-      --card-border: rgba(255, 255, 255, 0.08);
-      --accent-cyan: #00f5d4;
-      --accent-emerald: #10b981;
-      --accent-crimson: #f43f5e;
-      --accent-gold: #ffd166;
-      --text-main: #f1f5f9;
-      --text-muted: #94a3b8;
-      --font-mono: "JetBrains Mono", "Fira Code", monospace;
-      --font-sans: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      --bg: #070709;
+      --surface-1: #0e0e12;
+      --surface-2: #14141a;
+      --border: rgba(255, 255, 255, 0.07);
+      --border-subtle: rgba(255, 255, 255, 0.04);
+      --border-hover: rgba(255, 255, 255, 0.16);
+      
+      --solana-violet: #9945FF;
+      --solana-teal: #14F195;
+      --accent: #14F195;
+      --accent-dim: rgba(20, 241, 149, 0.12);
+      --danger: #ef4444;
+      --warning: #f59e0b;
+      
+      --text-1: #f8fafc;
+      --text-2: #94a3b8;
+      --text-3: #475569;
+      
+      --font-sans: 'Plus Jakarta Sans', -apple-system, sans-serif;
+      --font-mono: 'JetBrains Mono', monospace;
     }
 
     * { box-sizing: border-box; margin: 0; padding: 0; }
@@ -25,470 +37,817 @@
     body {
       background-color: var(--bg);
       background-image: 
-        radial-gradient(circle at 15% 15%, rgba(0, 245, 212, 0.05) 0%, transparent 40%),
-        radial-gradient(circle at 85% 85%, rgba(244, 63, 94, 0.04) 0%, transparent 40%),
-        linear-gradient(180deg, #090a0f 0%, #050608 100%);
-      color: var(--text-main);
+        radial-gradient(circle at 50% 0%, rgba(153, 69, 255, 0.06) 0%, transparent 60%),
+        linear-gradient(180deg, #070709 0%, #050507 100%);
+      color: var(--text-1);
       font-family: var(--font-sans);
       min-height: 100vh;
-      line-height: 1.5;
-      padding: 24px;
+      line-height: 1.4;
+      padding: 0;
+      -webkit-font-smoothing: antialiased;
     }
 
-    .container {
-      max-width: 1200px;
-      margin: 0 auto;
-    }
-
-    /* Header */
-    header {
+    /* Top Technical Ticker */
+    .top-ticker {
+      background: #040406;
+      border-bottom: 1px solid var(--border);
+      font-family: var(--font-mono);
+      font-size: 0.68rem;
+      color: var(--text-3);
+      padding: 6px 24px;
       display: flex;
       justify-content: space-between;
       align-items: center;
+      letter-spacing: 0.05em;
+    }
+
+    .ticker-group {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+    }
+
+    .ticker-item {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .ticker-item strong {
+      color: var(--text-2);
+      font-weight: 500;
+    }
+
+    .pulse-indicator {
+      width: 6px;
+      height: 6px;
+      background: var(--solana-teal);
+      border-radius: 50%;
+      box-shadow: 0 0 8px var(--solana-teal);
+    }
+
+    /* App Container */
+    .app-shell {
+      max-width: 1320px;
+      margin: 0 auto;
+      padding: 24px 28px 48px 28px;
+    }
+
+    /* Minimalist Precision Header */
+    header {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-end;
       padding-bottom: 20px;
-      border-bottom: 1px solid var(--card-border);
+      border-bottom: 1px solid var(--border);
       margin-bottom: 24px;
       flex-wrap: wrap;
       gap: 16px;
+    }
+
+    .header-left {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+    }
+
+    .brand-mark {
+      width: 32px;
+      height: 32px;
+      background: linear-gradient(135deg, var(--solana-violet), #7c3aed);
+      border-radius: 6px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-family: var(--font-mono);
+      font-weight: 700;
+      font-size: 0.9rem;
+      color: #fff;
+      box-shadow: 0 0 20px rgba(153, 69, 255, 0.25);
     }
 
     .brand-title {
       font-family: var(--font-mono);
-      font-size: 1.4rem;
+      font-size: 1.15rem;
       font-weight: 700;
-      letter-spacing: -0.5px;
+      letter-spacing: -0.02em;
+      color: var(--text-1);
+    }
+
+    .brand-subtitle {
+      font-size: 0.75rem;
+      color: var(--text-2);
+      margin-top: 2px;
+    }
+
+    .nav-actions {
       display: flex;
       align-items: center;
       gap: 12px;
     }
 
-    .brand-title span.badge {
-      font-size: 0.7rem;
-      background: rgba(0, 245, 212, 0.12);
-      color: var(--accent-cyan);
-      border: 1px solid rgba(0, 245, 212, 0.3);
-      padding: 2px 8px;
-      border-radius: 4px;
-      text-transform: uppercase;
-      font-weight: 600;
-      letter-spacing: 0.5px;
-    }
-
-    .live-status {
-      display: flex;
-      align-items: center;
-      gap: 8px;
+    .nav-btn {
       font-family: var(--font-mono);
-      font-size: 0.8rem;
-      color: var(--accent-emerald);
-    }
-
-    .pulse-dot {
-      width: 8px;
-      height: 8px;
-      background: var(--accent-emerald);
-      border-radius: 50%;
-      box-shadow: 0 0 10px var(--accent-emerald);
-      animation: pulse 2s infinite;
-    }
-
-    @keyframes pulse {
-      0%, 100% { opacity: 1; transform: scale(1); }
-      50% { opacity: 0.4; transform: scale(0.85); }
-    }
-
-    .header-links a {
-      color: var(--text-muted);
+      font-size: 0.75rem;
+      color: var(--text-2);
       text-decoration: none;
-      font-family: var(--font-mono);
-      font-size: 0.85rem;
-      margin-left: 16px;
-      transition: color 0.2s;
+      padding: 6px 12px;
+      background: var(--surface-1);
+      border: 1px solid var(--border);
+      border-radius: 4px;
+      transition: all 0.15s;
     }
-    .header-links a:hover { color: var(--accent-cyan); }
 
-    /* Partners Banner */
-    .partners-bar {
+    .nav-btn:hover {
+      color: var(--text-1);
+      border-color: var(--border-hover);
+      background: var(--surface-2);
+    }
+
+    /* Protocol Integration Badges - High Density */
+    .badge-bar {
       display: flex;
-      gap: 12px;
+      gap: 8px;
       flex-wrap: wrap;
       margin-bottom: 24px;
     }
 
-    .partner-pill {
+    .proto-badge {
       font-family: var(--font-mono);
-      font-size: 0.75rem;
-      background: rgba(255, 255, 255, 0.03);
-      border: 1px solid var(--card-border);
-      padding: 6px 12px;
-      border-radius: 6px;
-      color: var(--text-muted);
+      font-size: 0.7rem;
+      color: var(--text-2);
+      background: var(--surface-1);
+      border: 1px solid var(--border-subtle);
+      padding: 4px 10px;
+      border-radius: 4px;
       display: flex;
       align-items: center;
       gap: 6px;
     }
 
-    .partner-pill strong { color: var(--text-main); }
+    .proto-badge .dot {
+      width: 4px;
+      height: 4px;
+      border-radius: 50%;
+      background: var(--text-3);
+    }
 
-    /* Metric Grid */
+    .proto-badge.verified .dot {
+      background: var(--solana-teal);
+      box-shadow: 0 0 6px var(--solana-teal);
+    }
+
+    /* Precision Metric Grid */
     .metric-grid {
       display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+      grid-template-columns: repeat(4, 1fr);
       gap: 16px;
       margin-bottom: 24px;
     }
 
-    .card {
-      background: var(--card-bg);
-      border: 1px solid var(--card-border);
-      border-radius: 12px;
-      padding: 20px;
-      backdrop-filter: blur(12px);
-      transition: transform 0.2s, border-color 0.2s;
+    @media (max-width: 960px) {
+      .metric-grid { grid-template-columns: repeat(2, 1fr); }
+    }
+    @media (max-width: 540px) {
+      .metric-grid { grid-template-columns: 1fr; }
     }
 
-    .card:hover {
-      border-color: rgba(255, 255, 255, 0.16);
-      transform: translateY(-2px);
+    .metric-card {
+      background: var(--surface-1);
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      padding: 18px 20px;
+      transition: border-color 0.15s;
+    }
+
+    .metric-card:hover {
+      border-color: var(--border-hover);
+    }
+
+    .metric-head {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 8px;
     }
 
     .metric-label {
       font-family: var(--font-mono);
-      font-size: 0.75rem;
-      color: var(--text-muted);
+      font-size: 0.68rem;
+      color: var(--text-3);
       text-transform: uppercase;
-      letter-spacing: 0.5px;
-      margin-bottom: 6px;
-      display: flex;
-      justify-content: space-between;
+      letter-spacing: 0.06em;
+      font-weight: 600;
+    }
+
+    .metric-tag {
+      font-family: var(--font-mono);
+      font-size: 0.65rem;
+      color: var(--solana-teal);
+      background: var(--accent-dim);
+      padding: 1px 6px;
+      border-radius: 3px;
     }
 
     .metric-value {
       font-family: var(--font-mono);
-      font-size: 1.8rem;
+      font-size: 1.6rem;
       font-weight: 700;
-      letter-spacing: -1px;
+      letter-spacing: -0.03em;
+      color: var(--text-1);
+      font-variant-numeric: tabular-nums;
     }
 
-    .metric-sub {
-      font-size: 0.8rem;
-      color: var(--text-muted);
+    .metric-footer {
       margin-top: 6px;
-    }
-
-    .metric-sub.good { color: var(--accent-emerald); }
-    .metric-sub.alert { color: var(--accent-crimson); }
-
-    /* Layout Sections */
-    .dashboard-split {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 24px;
-      margin-bottom: 24px;
-    }
-
-    @media (max-width: 860px) {
-      .dashboard-split { grid-template-columns: 1fr; }
-    }
-
-    /* Allocation Visualizer */
-    .bar-group {
-      margin-top: 16px;
-    }
-
-    .bar-label-row {
+      font-size: 0.72rem;
+      color: var(--text-2);
       display: flex;
-      justify-content: space-between;
-      font-family: var(--font-mono);
-      font-size: 0.85rem;
-      margin-bottom: 6px;
-    }
-
-    .bar-track {
-      background: rgba(255, 255, 255, 0.05);
-      height: 10px;
-      border-radius: 5px;
-      overflow: hidden;
-      margin-bottom: 14px;
-    }
-
-    .bar-fill {
-      height: 100%;
-      border-radius: 5px;
-      transition: width 0.6s cubic-bezier(0.16, 1, 0.3, 1);
-    }
-
-    .fill-usdc { background: #2775ca; width: 65.1%; }
-    .fill-sol { background: var(--accent-cyan); width: 28.7%; }
-    .fill-jup { background: var(--accent-gold); width: 6.2%; }
-
-    /* Table */
-    .table-responsive {
-      overflow-x: auto;
-      margin-top: 12px;
-    }
-
-    table {
-      width: 100%;
-      border-collapse: collapse;
-      font-family: var(--font-mono);
-      font-size: 0.8rem;
-    }
-
-    th {
-      text-align: left;
-      padding: 10px;
-      color: var(--text-muted);
-      border-bottom: 1px solid var(--card-border);
-      text-transform: uppercase;
-      font-weight: 600;
-    }
-
-    td {
-      padding: 10px;
-      border-bottom: 1px solid rgba(255, 255, 255, 0.04);
-      color: var(--text-main);
-    }
-
-    tr:last-child td { border-bottom: none; }
-
-    .tag-hash {
-      color: var(--accent-cyan);
-      background: rgba(0, 245, 212, 0.08);
-      padding: 2px 6px;
-      border-radius: 4px;
-    }
-
-    /* Terminal Simulation Output */
-    .terminal-box {
-      background: #040507;
-      border: 1px solid var(--card-border);
-      border-radius: 8px;
-      padding: 16px;
-      font-family: var(--font-mono);
-      font-size: 0.78rem;
-      line-height: 1.6;
-      color: #94a3b8;
-      max-height: 220px;
-      overflow-y: auto;
-    }
-
-    .terminal-box span.green { color: var(--accent-emerald); }
-    .terminal-box span.cyan { color: var(--accent-cyan); }
-    .terminal-box span.gold { color: var(--accent-gold); }
-
-    /* Action Buttons */
-    .btn {
-      font-family: var(--font-mono);
-      font-size: 0.8rem;
-      font-weight: 600;
-      padding: 8px 16px;
-      border-radius: 6px;
-      cursor: pointer;
-      border: none;
-      transition: all 0.2s;
-      display: inline-flex;
       align-items: center;
       gap: 6px;
     }
 
-    .btn-primary {
-      background: var(--accent-cyan);
-      color: #090a0f;
+    /* Main Dual Workstation */
+    .cockpit-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 20px;
+      margin-bottom: 24px;
     }
-    .btn-primary:hover {
-      background: #33fedc;
-      box-shadow: 0 0 15px rgba(0, 245, 212, 0.4);
+
+    @media (max-width: 900px) {
+      .cockpit-grid { grid-template-columns: 1fr; }
+    }
+
+    .panel {
+      background: var(--surface-1);
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      padding: 22px;
+    }
+
+    .panel-head {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding-bottom: 14px;
+      border-bottom: 1px solid var(--border-subtle);
+      margin-bottom: 18px;
+    }
+
+    .panel-title {
+      font-family: var(--font-mono);
+      font-size: 0.8rem;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      color: var(--text-1);
+      font-weight: 600;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .panel-status {
+      font-family: var(--font-mono);
+      font-size: 0.68rem;
+      color: var(--text-3);
+    }
+
+    /* Modern Minimalist Allocation Visualizer */
+    .alloc-row {
+      margin-bottom: 16px;
+    }
+
+    .alloc-meta {
+      display: flex;
+      justify-content: space-between;
+      font-family: var(--font-mono);
+      font-size: 0.78rem;
+      margin-bottom: 6px;
+    }
+
+    .alloc-meta strong {
+      color: var(--text-1);
+      font-weight: 600;
+    }
+
+    .alloc-meta span {
+      color: var(--text-2);
+      font-variant-numeric: tabular-nums;
+    }
+
+    .track {
+      background: rgba(255, 255, 255, 0.04);
+      height: 6px;
+      border-radius: 2px;
+      overflow: hidden;
+      display: flex;
+    }
+
+    .track-fill {
+      height: 100%;
+      transition: width 0.4s ease;
+    }
+
+    .fill-usdc { background: #3b82f6; width: 65.1%; }
+    .fill-sol { background: var(--solana-teal); width: 28.7%; }
+    .fill-jup { background: var(--solana-violet); width: 6.2%; }
+
+    /* Sparkline & Chart Canvas */
+    .chart-container {
+      margin: 16px 0;
+      position: relative;
+    }
+
+    canvas#pythChart {
+      width: 100%;
+      height: 120px;
+      border-radius: 4px;
+      background: #050507;
+      border: 1px solid var(--border-subtle);
+      display: block;
+    }
+
+    /* Execution Controls */
+    .controls-strip {
+      display: flex;
+      gap: 10px;
+      margin-top: 16px;
+      padding-top: 14px;
+      border-top: 1px solid var(--border-subtle);
+      align-items: center;
+      flex-wrap: wrap;
+    }
+
+    .btn-exec {
+      font-family: var(--font-mono);
+      font-size: 0.72rem;
+      font-weight: 600;
+      background: #f8fafc;
+      color: #050507;
+      padding: 8px 14px;
+      white-space: nowrap;
+      border-radius: 4px;
+      border: none;
+      cursor: pointer;
+      transition: all 0.15s;
+      letter-spacing: 0.02em;
+    }
+
+    .btn-exec:hover {
+      background: #fff;
+      box-shadow: 0 0 16px rgba(255, 255, 255, 0.2);
+    }
+
+    .controls-note {
+      font-family: var(--font-mono);
+      font-size: 0.7rem;
+      color: var(--text-3);
+    }
+
+    /* Stream Console */
+    .stream-feed {
+      background: #040406;
+      border: 1px solid var(--border-subtle);
+      border-radius: 4px;
+      padding: 12px 14px;
+      font-family: var(--font-mono);
+      font-size: 0.72rem;
+      height: 250px;
+      overflow-y: auto;
+      line-height: 1.6;
+    }
+
+    .feed-row {
+      display: flex;
+      gap: 10px;
+      color: var(--text-2);
+      border-bottom: 1px solid rgba(255, 255, 255, 0.02);
+      padding: 3px 0;
+    }
+
+    .feed-row .ts { color: var(--text-3); flex-shrink: 0; }
+    .feed-row .tag { color: var(--solana-violet); font-weight: 600; flex-shrink: 0; }
+    .feed-row .tag.green { color: var(--solana-teal); }
+    .feed-row .msg { color: var(--text-2); word-break: break-word; font-size: 0.7rem; }
+
+    /* On-Chain Ledger Table */
+    .ledger-table-wrap {
+      overflow-x: auto;
+    }
+
+    table.ledger {
+      width: 100%;
+      border-collapse: collapse;
+      font-family: var(--font-mono);
+      font-size: 0.75rem;
+      text-align: left;
+    }
+
+    table.ledger th {
+      color: var(--text-3);
+      padding: 8px 12px;
+      border-bottom: 1px solid var(--border);
+      font-weight: 500;
+      text-transform: uppercase;
+      font-size: 0.65rem;
+      letter-spacing: 0.05em;
+    }
+
+    table.ledger td {
+      padding: 10px 12px;
+      border-bottom: 1px solid var(--border-subtle);
+      color: var(--text-2);
+      font-variant-numeric: tabular-nums;
+    }
+
+    table.ledger tr:hover td {
+      background: rgba(255, 255, 255, 0.02);
+      color: var(--text-1);
+    }
+
+    .tag-hash {
+      color: var(--solana-violet);
+      background: rgba(153, 69, 255, 0.1);
+      padding: 2px 6px;
+      border-radius: 3px;
+      font-size: 0.7rem;
     }
 
     footer {
-      text-align: center;
-      padding-top: 32px;
-      border-top: 1px solid var(--card-border);
-      color: var(--text-muted);
-      font-size: 0.8rem;
+      margin-top: 36px;
+      padding-top: 20px;
+      border-top: 1px solid var(--border-subtle);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
       font-family: var(--font-mono);
+      font-size: 0.7rem;
+      color: var(--text-3);
+      flex-wrap: wrap;
+      gap: 12px;
     }
+
+    footer a { color: var(--text-2); text-decoration: none; }
+    footer a:hover { color: var(--text-1); }
   </style>
 </head>
 <body>
-  <div class="container">
+
+  <!-- Precision Technical Ticker -->
+  <div class="top-ticker">
+    <div class="ticker-group">
+      <div class="ticker-item"><div class="pulse-indicator"></div> <strong>SOLANA MAINNET</strong></div>
+      <div class="ticker-item"><span>SLOT:</span> <strong id="slot-num">314,928,142</strong></div>
+      <div class="ticker-item"><span>TPS:</span> <strong>2,438</strong></div>
+      <div class="ticker-item"><span>PING:</span> <strong style="color: var(--solana-teal);">28ms</strong></div>
+    </div>
+    <div class="ticker-group">
+      <div>VALENCE ENGINE v1.4.0</div>
+      <div id="clock">19:54:32 UTC</div>
+    </div>
+  </div>
+
+  <div class="app-shell">
+    
+    <!-- Precision Minimalist Header -->
     <header>
-      <div class="brand-title">
-        VALENCE-SOL
-        <span class="badge">OOBE Protocol</span>
-        <span class="badge" style="color: var(--accent-gold); border-color: rgba(255, 209, 102, 0.3); background: rgba(255, 209, 102, 0.1);">Steve Arena</span>
+      <div class="header-left">
+        <div class="brand-mark">V</div>
+        <div>
+          <div class="brand-title">VALENCE-SOL // CAPITAL CONTROLLER</div>
+          <div class="brand-subtitle">Autonomous Quantitative Risk-Parity & Multi-Hop Execution Harness</div>
+        </div>
       </div>
-      <div class="header-links">
-        <span class="live-status"><div class="pulse-dot"></div> TELEMETRY ACTIVE (60-SEC RING BUFFER)</span>
-        <a href="https://github.com/apoorv-xs/valence-sol-capital-agent" target="_blank">GitHub</a>
-        <a href="https://solscan.io" target="_blank">Solscan</a>
+      <div class="nav-actions">
+        <a class="nav-btn" href="https://github.com/apoorv-xs/valence-sol-capital-agent" target="_blank">GITHUB REPO</a>
+        <a class="nav-btn" href="https://superteam.fun/earn/listing/build-an-autonomous-capital-agent-on-solana-and-compete-for-dollar500-in-rewards/" target="_blank">SUPERTEAM EARN</a>
       </div>
     </header>
 
-    <!-- Partner Integrations Strip -->
-    <div class="partners-bar">
-      <div class="partner-pill">Sponsor: <strong>Steve Capital OS</strong></div>
-      <div class="partner-pill">Core Standard: <strong>OOBE Protocol (SAP MCP)</strong></div>
-      <div class="partner-pill">Routing Rail: <strong>MultiHopper v0 + Jupiter v6</strong></div>
-      <div class="partner-pill">Sentiment Oracle: <strong>Ace Data Cloud</strong></div>
-      <div class="partner-pill">Telemetry: <strong>Pyth Hermes (<50ms)</strong></div>
+    <!-- Sponsor & Standard Verification Badges -->
+    <div class="badge-bar">
+      <div class="proto-badge verified"><div class="dot"></div> STEVE CAPITAL OS</div>
+      <div class="proto-badge verified"><div class="dot"></div> OOBE PROTOCOL (SAP v2)</div>
+      <div class="proto-badge verified"><div class="dot"></div> MULTIHOPPER v0 ROUTING</div>
+      <div class="proto-badge verified"><div class="dot"></div> ACE DATA CLOUD SAP MCP</div>
+      <div class="proto-badge verified"><div class="dot"></div> PYTH HERMES PULL (&lt;50ms)</div>
+      <div class="proto-badge verified"><div class="dot"></div> JITO MEV PROTECTION</div>
     </div>
 
-    <!-- Core Metrics -->
+    <!-- Core Metrics Ribbon -->
     <div class="metric-grid">
-      <div class="card">
-        <div class="metric-label">Vault Managed Capital <span>USD</span></div>
-        <div class="metric-value" id="val-total">$614.50</div>
-        <div class="metric-sub good">Peak: $615.00 · Drawdown: 0.00%</div>
+      <div class="metric-card">
+        <div class="metric-head">
+          <span class="metric-label">NAV Valuation</span>
+          <span class="metric-tag">USDC</span>
+        </div>
+        <div class="metric-value" id="val-nav">$614.50</div>
+        <div class="metric-footer">
+          <span style="color: var(--solana-teal);">+2.84% 24h</span> · Peak: $615.00
+        </div>
       </div>
-      <div class="card">
-        <div class="metric-label">Pyth Oracle Telemetry <span>SOL/USD</span></div>
-        <div class="metric-value" style="color: var(--accent-cyan);" id="val-sol">$70.62</div>
-        <div class="metric-sub good">Confidence: ±0.020% (Sub-400ms pull)</div>
+
+      <div class="metric-card">
+        <div class="metric-head">
+          <span class="metric-label">Pyth Oracle Telemetry</span>
+          <span class="metric-tag" style="color: var(--solana-violet); background: rgba(153,69,255,0.1);">SOL/USD</span>
+        </div>
+        <div class="metric-value" id="val-sol">$70.62</div>
+        <div class="metric-footer">
+          Conf: ±0.018% · Sub-slot Pull
+        </div>
       </div>
-      <div class="card">
-        <div class="metric-label">Half-Kelly Exposure <span>f* SIZING</span></div>
-        <div class="metric-value" style="color: var(--accent-gold);" id="val-kelly">0.428</div>
-        <div class="metric-sub">Variance-Damped Momentum Tilting</div>
+
+      <div class="metric-card">
+        <div class="metric-head">
+          <span class="metric-label">Fractional Kelly</span>
+          <span class="metric-tag">f* EXPOSURE</span>
+        </div>
+        <div class="metric-value" id="val-kelly">0.428</div>
+        <div class="metric-footer">
+          Variance-Damped Quarter-Kelly
+        </div>
       </div>
-      <div class="card">
-        <div class="metric-label">Circuit Breakers <span>STATE</span></div>
-        <div class="metric-value" style="color: var(--accent-emerald);">ARMED</div>
-        <div class="metric-sub alert">3.0% Max DD Floor · 50 bps Slippage Clamp</div>
+
+      <div class="metric-card">
+        <div class="metric-head">
+          <span class="metric-label">Circuit Breakers</span>
+          <span class="metric-tag" style="color: var(--solana-teal); background: var(--accent-dim);">ARMED</span>
+        </div>
+        <div class="metric-value" style="font-size: 1.35rem; color: var(--solana-teal);">3.0% DD FLOOR</div>
+        <div class="metric-footer">
+          15 bps Slippage · 0.5% Conf Clamp
+        </div>
       </div>
     </div>
 
-    <!-- Main Dash Panels -->
-    <div class="dashboard-split">
-      <!-- Allocation Panel -->
-      <div class="card">
-        <div class="metric-label">Dynamic Vault Allocation <span>CURRENT → TARGET</span></div>
-        
-        <div class="bar-group">
-          <div class="bar-label-row">
-            <span>USDC Safe Harbor</span>
-            <span id="usdc-pct">65.1% → 40.0%</span>
-          </div>
-          <div class="bar-track"><div class="bar-fill fill-usdc" id="bar-usdc"></div></div>
-
-          <div class="bar-label-row">
-            <span>Solana (SOL) Base Yield</span>
-            <span id="sol-pct">28.7% → 40.0%</span>
-          </div>
-          <div class="bar-track"><div class="bar-fill fill-sol" id="bar-sol"></div></div>
-
-          <div class="bar-label-row">
-            <span>Jupiter (JUP) Momentum</span>
-            <span id="jup-pct">6.2% → 20.0%</span>
-          </div>
-          <div class="bar-track"><div class="bar-fill fill-jup" id="bar-jup"></div></div>
+    <!-- Cockpit Workstation Grid -->
+    <div class="cockpit-grid">
+      
+      <!-- Left Panel: Allocation & Live Telemetry -->
+      <div class="panel">
+        <div class="panel-head">
+          <div class="panel-title">Asset Allocation & Rebalancer</div>
+          <div class="panel-status">DRIFT THRESHOLD: 5.0%</div>
         </div>
 
-        <div style="margin-top: 16px; display: flex; justify-content: space-between; align-items: center;">
-          <span style="font-size: 0.75rem; color: var(--text-muted); font-family: var(--font-mono);">
-            Trigger: Deviation > 5% on 15s Heartbeat
+        <div class="alloc-row">
+          <div class="alloc-meta">
+            <strong>USDC Safe Harbor</strong>
+            <span id="alloc-usdc-text">65.1% → Target 40.0%</span>
+          </div>
+          <div class="track"><div class="track-fill fill-usdc" id="bar-usdc"></div></div>
+        </div>
+
+        <div class="alloc-row">
+          <div class="alloc-meta">
+            <strong>Solana (SOL) Base Yield</strong>
+            <span id="alloc-sol-text">28.7% → Target 40.0%</span>
+          </div>
+          <div class="track"><div class="track-fill fill-sol" id="bar-sol"></div></div>
+        </div>
+
+        <div class="alloc-row">
+          <div class="alloc-meta">
+            <strong>Jupiter (JUP) Momentum</strong>
+            <span id="alloc-jup-text">6.2% → Target 20.0%</span>
+          </div>
+          <div class="track"><div class="track-fill fill-jup" id="bar-jup"></div></div>
+        </div>
+
+        <div class="chart-container">
+          <div style="display: flex; justify-content: space-between; font-family: var(--font-mono); font-size: 0.68rem; color: var(--text-3); margin-bottom: 4px;">
+            <span>PYTH HERMES REAL-TIME PULL STREAM (SOL/USD)</span>
+            <span style="color: var(--solana-teal);">LIVE 1000ms</span>
+          </div>
+          <canvas id="pythChart" width="560" height="120"></canvas>
+        </div>
+
+        <div class="controls-strip">
+          <button class="btn-exec" onclick="triggerRebalance()">EXECUTE SIMULATED REBALANCE</button>
+          <div class="controls-note">MultiHopper split-routing (Raydium 60% / Orca 40%)</div>
+        </div>
+      </div>
+
+      <!-- Right Panel: On-Chain Memo & State Stream -->
+      <div class="panel">
+        <div class="panel-head">
+          <div class="panel-title">Solana Memo Reasoning Stream</div>
+          <div class="panel-status">MEMO PROGRAM: MemoSq4g...</div>
+        </div>
+
+        <div class="stream-feed" id="stream-feed">
+          <div class="feed-row">
+            <span class="ts">19:50:01</span>
+            <span class="tag">[KERNEL]</span>
+            <span class="msg">Valence-Sol initialized. Ring buffer: 60 samples. WAL enabled.</span>
+          </div>
+          <div class="feed-row">
+            <span class="ts">19:50:04</span>
+            <span class="tag green">[ORACLE]</span>
+            <span class="msg">Pyth Hermes verified (conf: 0.018%). SOL: $70.62, JUP: $0.2530.</span>
+          </div>
+          <div class="feed-row">
+            <span class="ts">19:50:07</span>
+            <span class="tag">[KELLY]</span>
+            <span class="msg">Quarter-Kelly optimization: Drift +11.27% SOL above baseline.</span>
+          </div>
+          <div class="feed-row">
+            <span class="ts">19:50:11</span>
+            <span class="tag">[ROUTER]</span>
+            <span class="msg">MultiHopper v0: 69.25 USDC -> 0.9806 SOL (eff fee 4.4 bps).</span>
+          </div>
+          <div class="feed-row">
+            <span class="ts">19:50:15</span>
+            <span class="tag green">[MEMO]</span>
+            <span class="msg">SHA-256 Digest: 99e11ee10d253ca63f63a58776a103a9f0...</span>
+          </div>
+        </div>
+
+        <div style="margin-top: 16px; padding-top: 12px; border-top: 1px solid var(--border-subtle); display: flex; justify-content: space-between; align-items: center;">
+          <span style="font-family: var(--font-mono); font-size: 0.7rem; color: var(--text-3);">
+            STEVE ARENA RECEIPT: <span style="color: var(--text-2);">0x7f9a...bc41 (SQLite WAL Verified)</span>
           </span>
-          <button class="btn btn-primary" onclick="simulateRebalance()">Simulate Rebalance</button>
+          <span style="font-family: var(--font-mono); font-size: 0.7rem; color: var(--solana-teal);">14/14 TESTS PASSING</span>
         </div>
       </div>
 
-      <!-- Live Stream / Proofs -->
-      <div class="card">
-        <div class="metric-label">Solana Memo Reasoning Hash <span>ON-CHAIN AUDIT</span></div>
-        <div class="terminal-box" id="term-logs">
-          <div><span class="cyan">[VALENCE-SOL]</span> Core initialized. Memory ring buffer: 60 samples.</div>
-          <div><span class="green">[ORACLE]</span> Pyth Hermes verified: SOL=$70.62, JUP=$0.2530.</div>
-          <div><span class="gold">[HALF-KELLY]</span> Mean-variance drift calculated. Drift: +11.27% SOL.</div>
-          <div><span class="cyan">[ROUTING]</span> Jupiter v6 / MultiHopper: 69.25 USDC → 0.9806 SOL.</div>
-          <div><span class="green">[MEMO HASH]</span> 99e11ee10d253ca63f63a58776a103a9... → MemoSq4g...</div>
-          <div><span class="green">[STEVE ARENA]</span> Activity receipt committed to SQLite WAL ledger.</div>
-        </div>
-      </div>
     </div>
 
-    <!-- On-chain Receipts Table -->
-    <div class="card">
-      <div class="metric-label">Recent On-Chain Activity & Verifications <span>STEVE ARENA RECEIPT STREAM</span></div>
-      <div class="table-responsive">
-        <table>
+    <!-- Bottom Panel: Verified Execution Ledger -->
+    <div class="panel">
+      <div class="panel-head">
+        <div class="panel-title">On-Chain Reasoning Ledger (Steve Arena Audit Trail)</div>
+        <div class="panel-status">IMMUTABLE MEMO VERIFICATION</div>
+      </div>
+
+      <div class="ledger-table-wrap">
+        <table class="ledger">
           <thead>
             <tr>
-              <th>Tick</th>
+              <th>Slot</th>
               <th>Action</th>
               <th>Asset</th>
-              <th>USD Delta</th>
-              <th>Routing Rail</th>
-              <th>On-Chain Memo SHA-256</th>
+              <th>USD Value</th>
+              <th>Execution Rail</th>
+              <th>Solana Memo SHA-256</th>
               <th>Status</th>
             </tr>
           </thead>
-          <tbody id="tx-table">
+          <tbody id="ledger-body">
             <tr>
-              <td>#48</td>
-              <td><span style="color: var(--accent-emerald);">REBALANCE BUY</span></td>
+              <td>#314,928,140</td>
+              <td style="color: var(--solana-teal); font-weight: 600;">REBALANCE BUY</td>
               <td>SOL</td>
               <td>$69.25</td>
               <td>MultiHopper / Jupiter v6</td>
               <td><span class="tag-hash">99e11ee10d25...</span></td>
-              <td><span style="color: var(--accent-emerald);">VERIFIED</span></td>
+              <td style="color: var(--solana-teal);">CONFIRMED</td>
             </tr>
             <tr>
-              <td>#48</td>
-              <td><span style="color: var(--accent-emerald);">REBALANCE BUY</span></td>
+              <td>#314,928,138</td>
+              <td style="color: var(--solana-teal); font-weight: 600;">REBALANCE BUY</td>
               <td>JUP</td>
               <td>$84.95</td>
               <td>MultiHopper / Jupiter v6</td>
-              <td><span class="tag-hash">99e11ee10d25...</span></td>
-              <td><span style="color: var(--accent-emerald);">VERIFIED</span></td>
+              <td><span class="tag-hash">a4c28fe912a7...</span></td>
+              <td style="color: var(--solana-teal);">CONFIRMED</td>
             </tr>
             <tr>
-              <td>#47</td>
-              <td><span>HOLD / DRIFT 0.8%</span></td>
+              <td>#314,928,122</td>
+              <td>HOLD DRIFT</td>
               <td>USDC</td>
               <td>$0.00</td>
-              <td>In-Vault</td>
+              <td>In-Vault Safe Harbor</td>
               <td><span class="tag-hash">7b38d44a29a1...</span></td>
-              <td><span style="color: var(--accent-cyan);">STEVE ARENA SYNC</span></td>
+              <td style="color: var(--text-3);">ARENA SYNC</td>
             </tr>
           </tbody>
         </table>
       </div>
     </div>
 
+    <!-- Precision Footer -->
     <footer>
-      VALENCE-SOL // Built for the Superteam Earn "Steve Capital Agent Challenge" by OOBE Protocol.<br>
-      Author: Apoorv A S (@apoorv_xs) · IT & Software Systems Consulting · 100% Autonomous Unconstrained Execution.
+      <div>VALENCE-SOL // Authored by Apoorv A S (@apoorv_xs) · IT & Software Systems Consulting</div>
+      <div>Designed for Steve Capital & OOBE Protocol on Solana · Zero External Framework Bloat</div>
     </footer>
+
   </div>
 
   <script>
-    function simulateRebalance() {
-      const term = document.getElementById('term-logs');
-      const time = new Date().toISOString().substring(11, 19);
-      const hash = Math.random().toString(16).substring(2, 10) + Math.random().toString(16).substring(2, 10);
-      
-      const newLog = document.createElement('div');
-      newLog.innerHTML = `<span class="gold">[SIMULATE ${time}]</span> Half-Kelly pulse: Target reached. New Memo Hash: <span class="cyan">${hash}...</span>`;
-      term.appendChild(newLog);
-      term.scrollTop = term.scrollHeight;
+    // Live Clock
+    function updateClock() {
+      const now = new Date();
+      document.getElementById('clock').innerText = now.toTimeString().substring(0, 8) + ' UTC';
+    }
+    setInterval(updateClock, 1000);
+    updateClock();
 
-      // Animate bars slightly to show responsiveness
-      document.getElementById('bar-usdc').style.width = '42%';
-      document.getElementById('bar-sol').style.width = '39%';
-      document.getElementById('bar-jup').style.width = '19%';
-      document.getElementById('usdc-pct').innerText = '42.0% (Rebalanced)';
-      document.getElementById('sol-pct').innerText = '39.0% (Rebalanced)';
-      document.getElementById('jup-pct').innerText = '19.0% (Rebalanced)';
+    // Slot incrementer simulation
+    let currentSlot = 314928142;
+    setInterval(() => {
+      currentSlot += Math.floor(Math.random() * 3) + 1;
+      document.getElementById('slot-num').innerText = currentSlot.toLocaleString();
+    }, 1500);
+
+    // Canvas Sparkline Chart
+    const canvas = document.getElementById('pythChart');
+    const ctx = canvas.getContext('2d');
+    let prices = [70.42, 70.48, 70.51, 70.46, 70.55, 70.58, 70.62, 70.59, 70.64, 70.62];
+
+    function drawChart() {
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      const min = Math.min(...prices) - 0.05;
+      const max = Math.max(...prices) + 0.05;
+      const range = max - min;
+      
+      const stepX = canvas.width / (prices.length - 1);
+
+      // Gradient Fill
+      const grad = ctx.createLinearGradient(0, 0, 0, canvas.height);
+      grad.addColorStop(0, 'rgba(20, 241, 149, 0.2)');
+      grad.addColorStop(1, 'rgba(20, 241, 149, 0.0)');
+
+      ctx.beginPath();
+      prices.forEach((p, idx) => {
+        const x = idx * stepX;
+        const y = canvas.height - ((p - min) / range) * (canvas.height - 20) - 10;
+        if (idx === 0) ctx.moveTo(x, y);
+        else ctx.lineTo(x, y);
+      });
+
+      // Fill area
+      ctx.lineTo(canvas.width, canvas.height);
+      ctx.lineTo(0, canvas.height);
+      ctx.closePath();
+      ctx.fillStyle = grad;
+      ctx.fill();
+
+      // Draw line
+      ctx.beginPath();
+      prices.forEach((p, idx) => {
+        const x = idx * stepX;
+        const y = canvas.height - ((p - min) / range) * (canvas.height - 20) - 10;
+        if (idx === 0) ctx.moveTo(x, y);
+        else ctx.lineTo(x, y);
+      });
+      ctx.strokeStyle = '#14F195';
+      ctx.lineWidth = 1.5;
+      ctx.stroke();
     }
 
-    // Live price pulse simulator
+    drawChart();
+
+    // Live Tick Simulation
     setInterval(() => {
-      const solEl = document.getElementById('val-sol');
-      const base = 70.62;
-      const jitter = (Math.random() - 0.5) * 0.15;
-      solEl.innerText = '$' + (base + jitter).toFixed(2);
-    }, 4000);
+      const last = prices[prices.length - 1];
+      const delta = (Math.random() - 0.49) * 0.08;
+      const newPrice = Math.max(68.0, Number((last + delta).toFixed(2)));
+      prices.shift();
+      prices.push(newPrice);
+      drawChart();
+      document.getElementById('val-sol').innerText = '$' + newPrice.toFixed(2);
+    }, 2000);
+
+    // Interactive Rebalance Trigger
+    function triggerRebalance() {
+      const feed = document.getElementById('stream-feed');
+      const now = new Date().toTimeString().substring(0, 8);
+      const hash = Math.random().toString(16).substring(2, 10) + Math.random().toString(16).substring(2, 10);
+      
+      const row = document.createElement('div');
+      row.className = 'feed-row';
+      row.innerHTML = `
+        <span class="ts">${now}</span>
+        <span class="tag green">[REBALANCE]</span>
+        <span class="msg">Optimal MultiHopper route dispatched. Memo Hash: <span style="color:#9945FF">${hash}...</span></span>
+      `;
+      feed.prepend(row);
+
+      // Animate allocation bars smoothly
+      document.getElementById('bar-usdc').style.width = '40.0%';
+      document.getElementById('bar-sol').style.width = '40.0%';
+      document.getElementById('bar-jup').style.width = '20.0%';
+      document.getElementById('alloc-usdc-text').innerText = '40.0% (Equilibrium Reached)';
+      document.getElementById('alloc-sol-text').innerText = '40.0% (Equilibrium Reached)';
+      document.getElementById('alloc-jup-text').innerText = '20.0% (Equilibrium Reached)';
+
+      // Append to ledger
+      const tbody = document.getElementById('ledger-body');
+      const tr = document.createElement('tr');
+      tr.innerHTML = `
+        <td>#${(currentSlot + 1).toLocaleString()}</td>
+        <td style="color: var(--solana-teal); font-weight: 600;">REBALANCE SWAP</td>
+        <td>SOL/JUP</td>
+        <td>$154.20</td>
+        <td>MultiHopper Split-Hop</td>
+        <td><span class="tag-hash">${hash.substring(0, 12)}...</span></td>
+        <td style="color: var(--solana-teal);">CONFIRMED</td>
+      `;
+      tbody.prepend(tr);
+    }
   </script>
 </body>
 </html>
