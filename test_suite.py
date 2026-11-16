@@ -1,5 +1,5 @@
 """
-Argon-Sol: Autonomous Capital Agent Test Suite
+Valence-Sol: Autonomous Capital Agent Test Suite
 ================================================
 Comprehensive unit tests for:
 - Mathematical ring buffer and momentum tracking

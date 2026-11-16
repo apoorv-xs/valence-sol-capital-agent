@@ -16,11 +16,11 @@ from typing import Dict, Any, Optional
 
 class SteveArenaAdapter:
     """
-    Adapter bridging Argon-Sol to Steve Capital OS and OOBE Protocol.
+    Adapter bridging Valence-Sol to Steve Capital OS and OOBE Protocol.
     Enforces the mandatory >= 20 USDC capital threshold and exposes
     structured status receipts for Steve Arena automated validation.
     """
-    def __init__(self, agent_id: str = "argon-sol-v1", min_capital_usdc: float = 20.0):
+    def __init__(self, agent_id: str = "valence-sol-v1", min_capital_usdc: float = 20.0):
         self.agent_id = agent_id
         self.min_capital_usdc = min_capital_usdc
         self.protocol_name = "OOBE Protocol"
@@ -73,7 +73,7 @@ class SteveArenaAdapter:
         return [
             {
                 "name": "get_steve_agent_status",
-                "description": "Returns Argon-Sol status and compliance state with Steve Capital / OOBE Protocol",
+                "description": "Returns Valence-Sol status and compliance state with Steve Capital / OOBE Protocol",
                 "parameters": {"type": "object", "properties": {}}
             },
             {

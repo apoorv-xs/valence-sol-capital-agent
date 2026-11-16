@@ -1,4 +1,4 @@
-# Argon-Sol: Autonomous Capital Agent on Solana
+# Valence-Sol: Autonomous Capital Agent on Solana
 
 > **Author:** Apoorv A S (@apoorv_xs) | IT & Software Systems Consulting  
 > **Challenge:** Superteam Earn — "Steve Capital Agent Challenge" by OOBE Protocol ($500 USDC)  
@@ -8,7 +8,7 @@
 
 ## What It Does
 
-**Argon-Sol** is an enterprise-grade autonomous capital allocation agent built for **Steve Capital** and powered by **OOBE Protocol** on Solana mainnet:
+**Valence-Sol** is an enterprise-grade autonomous capital allocation agent built for **Steve Capital** and powered by **OOBE Protocol** on Solana mainnet:
 
 1. **Reads live prices** from the Pyth pull oracle (Hermes endpoint, <50ms latency) with confidence interval validation and Coinbase/CoinGecko failover
 2. **Computes momentum signals** from a 60-sample zero-allocation `numpy.float64` ring buffer
@@ -27,7 +27,7 @@
 
 ```
 ┌─────────────────────────────────────────────────────────────────┐
-│                    ARGON-SOL CAPITAL AGENT                     │
+│                    VALENCE-SOL CAPITAL AGENT                     │
 │                                                                 │
 │  ┌──────────────────────┐    ┌──────────────────────────────┐  │
 │  │   Pyth Hermes Oracle │    │   Momentum Engine            │  │
@@ -73,14 +73,14 @@
 
 ## OOBE Protocol & Steve Arena Integration
 
-Argon-Sol is engineered to natively interface with **Steve Capital (OOBE Protocol)** and the **Solana Agentic Protocol (SAP)**:
+Valence-Sol is engineered to natively interface with **Steve Capital (OOBE Protocol)** and the **Solana Agentic Protocol (SAP)**:
 
-- **Model Context Protocol (MCP) Server (`argon_mcp_server.py`)**: Exposes structured JSON-RPC tools (`get_vault_state`, `get_oracle_prices`, `evaluate_rebalance`, `get_steve_arena_status`) so external AI agents, Steve Arena coordinators, MultiHopper routers, and Ace Data Cloud can orchestrate Argon-Sol programmatically.
+- **Model Context Protocol (MCP) Server (`valence_mcp_server.py`)**: Exposes structured JSON-RPC tools (`get_vault_state`, `get_oracle_prices`, `evaluate_rebalance`, `get_steve_arena_status`) so external AI agents, Steve Arena coordinators, MultiHopper routers, and Ace Data Cloud can orchestrate Valence-Sol programmatically.
 - **Steve Arena On-Chain Verification**: Every live rebalance transaction embeds the SHA-256 decision hash into the Solana Memo Program (`MemoSq4gqABAXKb96qnH8TysNcWxMyWCqXgDLGmfcHr`), creating an immutable cryptographic audit record registered directly on Steve Arena.
 
 ```bash
-# Launch Argon-Sol MCP Server (SAP bridge for OOBE / Steve Capital)
-python argon_mcp_server.py
+# Launch Valence-Sol MCP Server (SAP bridge for OOBE / Steve Capital)
+python valence_mcp_server.py
 ```
 
 ---
@@ -100,8 +100,8 @@ python argon_mcp_server.py
 
 ```bash
 # 1. Clone
-git clone https://github.com/apoorv-xs/argon-sol-capital-agent
-cd argon-sol-capital-agent
+git clone https://github.com/apoorv-xs/valence-sol-capital-agent
+cd valence-sol-capital-agent
 
 # 2. Install lightweight requirements (zero solana compilation required for dry-run/testing)
 pip install httpx numpy
@@ -127,7 +127,7 @@ python agent_core.py --live --confirm-live-risk
 
 ```
 ╔══════════════════════════════════════════════════════════════╗
-║          ARGON-SOL // AUTONOMOUS CAPITAL AGENT  [DRY-RUN]  ║
+║          VALENCE-SOL // AUTONOMOUS CAPITAL AGENT  [DRY-RUN]  ║
 ╠══════════════════════════════════════════════════════════════╣
 ║  Tick #42     Vault Total:   $1,034.52   DD:  0.00%         ║
 ╠══════════════════════════════════════════════════════════════╣
@@ -204,7 +204,7 @@ Verifiable on Solscan: `https://solscan.io/tx/<signature>`
 
 ## Roadmap & Ecosystem Grant Pitch
 
-Argon-Sol was built with an extensible plugin architecture. The next milestone expands this core into:
+Valence-Sol was built with an extensible plugin architecture. The next milestone expands this core into:
 
 - **Jupiter Perps hedging** — autonomous delta-neutral position management
 - **Kamino / Meteora yield harvesting** — multi-protocol liquidity optimization

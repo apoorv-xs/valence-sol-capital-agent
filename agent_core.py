@@ -1,5 +1,5 @@
 """
-Argon-Sol: Autonomous Capital Agent on Solana
+Valence-Sol: Autonomous Capital Agent on Solana
 ===============================================
 Architecture integrating all council directives:
 - Pyth pull oracle (sub-400ms confidence intervals)
@@ -28,7 +28,7 @@ try:
     import httpx
     import numpy as np
 except ImportError as _e:
-    print(f"\n[ARGON-SOL ERROR] Missing required dependency '{_e.name}'. Run: pip install -r requirements.txt\n")
+    print(f"\n[VALENCE-SOL ERROR] Missing required dependency '{_e.name}'. Run: pip install -r requirements.txt\n")
     sys.exit(1)
 try:
     from solana.rpc.async_api import AsyncClient
@@ -45,7 +45,7 @@ except ImportError:
 import base64
 
 # ── CLI args ──────────────────────────────────────────────────────────────────
-parser = argparse.ArgumentParser(description="Argon-Sol Autonomous Capital Agent")
+parser = argparse.ArgumentParser(description="Valence-Sol Autonomous Capital Agent")
 parser.add_argument("--dry-run", action="store_true", default=True,
                     help="Simulate swaps without on-chain execution (default: enabled)")
 parser.add_argument("--live", action="store_true", default=False,
@@ -96,7 +96,7 @@ logging.basicConfig(
     format="%(asctime)s [%(levelname)s] %(message)s",
     datefmt="%Y-%m-%dT%H:%M:%S",
 )
-log = logging.getLogger("argon-sol")
+log = logging.getLogger("valence-sol")
 
 
 # ── SQLite WAL Ledger ─────────────────────────────────────────────────────────
@@ -573,7 +573,7 @@ def print_dashboard(state: VaultState, prices: dict, targets: dict) -> None:
     mode_tag = "[DRY-RUN]" if DRY_RUN else "[LIVE ⚡]"
     print(f"""
 ╔══════════════════════════════════════════════════════════════╗
-║          ARGON-SOL // AUTONOMOUS CAPITAL AGENT  {mode_tag}  ║
+║          VALENCE-SOL // AUTONOMOUS CAPITAL AGENT  {mode_tag}  ║
 ╠══════════════════════════════════════════════════════════════╣
 ║  Tick #{state.tick:<5}   Vault Total: ${total:>10.2f}   DD: {dd*100:>5.2f}%      ║
 ╠══════════════════════════════════════════════════════════════╣
@@ -595,7 +595,7 @@ def print_dashboard(state: VaultState, prices: dict, targets: dict) -> None:
 async def run_agent() -> None:
     if DRY_RUN:
         log.info("=" * 60)
-        log.info("ARGON-SOL | DRY-RUN MODE (no funds at risk)")
+        log.info("VALENCE-SOL | DRY-RUN MODE (no funds at risk)")
         log.info("Pass --live --confirm-live-risk for real execution")
         log.info("=" * 60)
         keypair = None
@@ -668,5 +668,5 @@ if __name__ == "__main__":
     try:
         asyncio.run(run_agent())
     except KeyboardInterrupt:
-        print("\n\033[36m[ARGON-SOL]\033[0m Shutdown signal received. SQLite WAL state preserved. Exiting cleanly.")
+        print("\n\033[36m[VALENCE-SOL]\033[0m Shutdown signal received. SQLite WAL state preserved. Exiting cleanly.")
         sys.exit(0)
