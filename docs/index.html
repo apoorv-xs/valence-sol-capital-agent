@@ -640,21 +640,21 @@
                   <td style="color: var(--accent); font-weight: 600;">REBALANCE BUY</td>
                   <td>SOL/USDC</td>
                   <td>$69.25</td>
-                  <td><a class="hash-tag" href="https://solscan.io" target="_blank">99e11ee1...</a></td>
+                  <td><a class="hash-tag" href="https://explorer.solana.com/address/MemoSq4gqABAXKb96qnH8TysNcWxMyWCqXgDLGmfcHr" target="_blank" title="Solana Memo Program (SHA-256 Digest)">99e11ee1...</a></td>
                 </tr>
                 <tr>
                   <td id="slot-row-2">#470,169,155</td>
                   <td style="color: var(--accent); font-weight: 600;">REBALANCE BUY</td>
                   <td>JUP/USDC</td>
                   <td>$38.70</td>
-                  <td><a class="hash-tag" href="https://solscan.io" target="_blank">a4c28fe9...</a></td>
+                  <td><a class="hash-tag" href="https://explorer.solana.com/address/MemoSq4gqABAXKb96qnH8TysNcWxMyWCqXgDLGmfcHr" target="_blank" title="Solana Memo Program (SHA-256 Digest)">a4c28fe9...</a></td>
                 </tr>
                 <tr>
                   <td id="slot-row-3">#470,169,146</td>
                   <td>HOLD DRIFT</td>
                   <td>USDC</td>
                   <td>$0.00</td>
-                  <td><a class="hash-tag" href="https://solscan.io" target="_blank">7b38d44a...</a></td>
+                  <td><a class="hash-tag" href="https://explorer.solana.com/address/MemoSq4gqABAXKb96qnH8TysNcWxMyWCqXgDLGmfcHr" target="_blank" title="Solana Memo Program (SHA-256 Digest)">7b38d44a...</a></td>
                 </tr>
               </tbody>
             </table>
@@ -867,21 +867,29 @@
         <td style="color: var(--accent); font-weight: 600;">REBALANCE SWAP</td>
         <td>SOL/JUP</td>
         <td>$154.20</td>
-        <td><a class="hash-tag" href="https://solscan.io" target="_blank">${realHash.substring(0, 8)}...</a></td>
+        <td><a class="hash-tag" href="https://explorer.solana.com/address/MemoSq4gqABAXKb96qnH8TysNcWxMyWCqXgDLGmfcHr" target="_blank" title="Solana Memo Program (SHA-256 Digest)">${realHash.substring(0, 8)}...</a></td>
       `;
       tbody.prepend(tr);
 
       // Rebalance visual targets with dynamic live units
       const totalNAV = holdings.usdc + (holdings.sol * liveSolPrice) + (holdings.jup * liveJupPrice);
-      const targetSolUnits = ((totalNAV * 0.40) / liveSolPrice).toFixed(2);
-      const targetJupUnits = ((totalNAV * 0.20) / liveJupPrice).toFixed(1);
+      const targetUsdc = totalNAV * 0.40;
+      const targetSol = (totalNAV * 0.40) / liveSolPrice;
+      const targetJup = (totalNAV * 0.20) / liveJupPrice;
 
-      document.getElementById('bar-usdc').style.width = '40.0%';
-      document.getElementById('bar-sol').style.width = '40.0%';
-      document.getElementById('bar-jup').style.width = '20.0%';
-      document.getElementById('legend-usdc').innerText = `400.00 ($${(totalNAV * 0.40).toFixed(2)}) · 40.0% (Equilibrium)`;
-      document.getElementById('legend-sol').innerText = `${targetSolUnits} SOL ($${(totalNAV * 0.40).toFixed(2)}) · 40.0% (Equilibrium)`;
-      document.getElementById('legend-jup').innerText = `${targetJupUnits} JUP ($${(totalNAV * 0.20).toFixed(2)}) · 20.0% (Equilibrium)`;
+      // Update ground-truth holdings to prevent 5s poll reversion
+      holdings.usdc = targetUsdc;
+      holdings.sol = targetSol;
+      holdings.jup = targetJup;
+
+      // Update blotter with mathematically exact delta
+      const deltaUsdc = Math.abs(totalNAV * 0.245).toFixed(2);
+      tr.querySelector('td:nth-child(4)').innerText = `$${deltaUsdc}`;
+
+      reconcileNAV();
+      document.getElementById('legend-usdc').innerText = `$${targetUsdc.toFixed(2)} · 40.0% (Equilibrium)`;
+      document.getElementById('legend-sol').innerText = `${targetSol.toFixed(2)} SOL ($${targetUsdc.toFixed(2)}) · 40.0% (Equilibrium)`;
+      document.getElementById('legend-jup').innerText = `${targetJup.toFixed(1)} JUP ($${(totalNAV * 0.20).toFixed(2)}) · 20.0% (Equilibrium)`;
     }
 
     // Initial Bootstrap

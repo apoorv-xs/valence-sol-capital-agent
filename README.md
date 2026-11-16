@@ -112,7 +112,7 @@ cd valence-sol-capital-agent
 # 2. Install lightweight requirements (zero solana compilation required for dry-run/testing)
 pip install httpx numpy
 
-# 3. Run automated unit test suite (14 tests, 0.011s execution)
+# 3. Run automated unit test suite (18 tests, 0.011s execution)
 python test_suite.py
 
 # 4. Run judge verification (3 ticks with live oracle & Jupiter routing)

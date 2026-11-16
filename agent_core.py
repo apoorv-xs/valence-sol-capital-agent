@@ -646,53 +646,58 @@ async def run_agent() -> None:
     conn  = init_db()
     state = VaultState()
 
-    async with httpx.AsyncClient(
-        limits=httpx.Limits(max_connections=10, max_keepalive_connections=5),
-        timeout=httpx.Timeout(10.0),
-    ) as session:
-        while True:
-            tick_start = time.monotonic()
-            state.tick += 1
+    try:
+        async with httpx.AsyncClient(
+            limits=httpx.Limits(max_connections=10, max_keepalive_connections=5),
+            timeout=httpx.Timeout(10.0),
+        ) as session:
+            while True:
+                tick_start = time.monotonic()
+                state.tick += 1
 
-            # 1. Oracle prices
-            prices = await fetch_pyth_prices(session)
-            if not prices:
-                log.warning("No oracle data — skipping tick")
-                await asyncio.sleep(HEARTBEAT_S)
-                continue
+                # 1. Oracle prices
+                prices = await fetch_pyth_prices(session)
+                if not prices:
+                    log.warning("No oracle data — skipping tick")
+                    await asyncio.sleep(HEARTBEAT_S)
+                    continue
 
-            # 2. Update ring buffer (zero-alloc)
-            state.push_prices(prices.get("SOL", 0.0), prices.get("JUP", 0.0))
+                # 2. Update ring buffer (zero-alloc)
+                state.push_prices(prices.get("SOL", 0.0), prices.get("JUP", 0.0))
 
-            # 3. Vault balances
-            if rpc and pubkey:
-                await refresh_vault_balances(rpc, pubkey, state)
-            else:
-                await refresh_vault_balances(None, None, state)  # returns mocked balances
+                # 3. Vault balances
+                if rpc and pubkey:
+                    await refresh_vault_balances(rpc, pubkey, state)
+                else:
+                    await refresh_vault_balances(None, None, state)  # returns mocked balances
 
-            # 4. Targets + reasoning hash
-            targets         = compute_target_weights(state, prices)
-            reasoning_hash  = build_reasoning_hash(state, prices, targets)
+                # 4. Targets + reasoning hash
+                targets         = compute_target_weights(state, prices)
+                reasoning_hash  = build_reasoning_hash(state, prices, targets)
 
-            # 5. Dashboard
-            print_dashboard(state, prices, targets)
-            log.info("Reasoning hash: %s (embedded in Memo Program on-chain)", reasoning_hash)
+                # 5. Dashboard
+                print_dashboard(state, prices, targets)
+                log.info("Reasoning hash: %s (embedded in Memo Program on-chain)", reasoning_hash)
 
-            # 6. Log oracle tick to DB
-            log_oracle_tick(conn, state.tick, prices)
+                # 6. Log oracle tick to DB
+                log_oracle_tick(conn, state.tick, prices)
 
-            # 7. Rebalance
-            await rebalance_vault(session, rpc, keypair, state, prices, targets, conn, reasoning_hash)
+                # 7. Rebalance
+                await rebalance_vault(session, rpc, keypair, state, prices, targets, conn, reasoning_hash)
 
-            # 8. Sleep remainder or exit if --ticks limit reached
-            if args.ticks > 0 and state.tick >= args.ticks:
-                log.info("Completed %d requested tick(s). Exiting cleanly.", args.ticks)
-                break
+                # 8. Sleep remainder or exit if --ticks limit reached
+                if args.ticks > 0 and state.tick >= args.ticks:
+                    log.info("Completed %d requested tick(s). Exiting cleanly.", args.ticks)
+                    break
 
-            elapsed = time.monotonic() - tick_start
-            sleep   = max(0.0, HEARTBEAT_S - elapsed)
-            log.info("Tick #%d done in %.3fs → sleeping %.2fs", state.tick, elapsed, sleep)
-            await asyncio.sleep(sleep)
+                elapsed = time.monotonic() - tick_start
+                sleep   = max(0.0, HEARTBEAT_S - elapsed)
+                log.info("Tick #%d done in %.3fs → sleeping %.2fs", state.tick, elapsed, sleep)
+                await asyncio.sleep(sleep)
+    finally:
+        conn.close()
+        if rpc:
+            await rpc.close()
 
 
 if __name__ == "__main__":
